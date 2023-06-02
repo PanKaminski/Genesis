@@ -1,0 +1,15 @@
+<div class="side-editor">
+    <ng-container *ngIf="formLoaded; else loadingPanel">
+        <app-form [form]="form"
+                  [hasAvatar]="false"
+                  [isNew]="isNewTree"
+                  [updating]="updating"
+                  (closeForm)="onClose()"
+                  (deleteFormItem)="onDelete()"
+                  (saveForm)="onSave($event)">
+        </app-form>
+    </ng-container>
+    <ng-template #loadingPanel>
+        <app-loading-panel></app-loading-panel>
+    </ng-template>    
+</div>

@@ -1,0 +1,82 @@
+@import "common";
+
+.form-fields-wrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 13px 50px 14px 58px;
+
+    .avatar-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+        margin-top: 20px;
+        margin-bottom: 20px;
+
+        img {
+          width: 200px;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
+        }
+    }
+}
+
+::ng-deep .mat-mdc-tab-header {
+    height: $header-height;
+}
+
+.side-editor {
+    height: 100%;
+    width: 500px;
+    background-color: $project-white;
+    z-index: 1000;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 5px 6px 12px 10px rgba(0, 0, 0, 0.2);
+    
+    &-body {
+      width: 100%;
+      align-items: center;
+      box-sizing: border-box;
+      height: calc(100% - $buttons-area - 18px);
+      position: relative;
+      overflow: auto;
+      padding: 0 0 26px 0;
+
+      .side-editor-form {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  
+    &_actions {
+      position: relative;
+      bottom: 0;
+      flex-shrink: 0;
+      width: 100%;
+      right: 0;
+  
+      &-group {
+        padding: 13px 28px 14px 36px;
+  
+        &-left {
+          display: flex;
+          gap: 12px;
+          float: left;
+          text-align: left;
+        }
+  
+        &-right {
+          display: flex;
+          gap: 12px;  
+          float: right;
+          text-align: right;
+        }
+      }
+    }
+}
+
+textarea {
+    min-height: 200px;
+}

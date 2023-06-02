@@ -1,0 +1,131 @@
+<div class="login form-container">
+    <h1 class="form-container_header">Create <span>Account</span></h1>
+    <div class="form-container_body">
+        <ng-container *ngIf="!isLinkSent; else messageLoaded">
+            <form [formGroup]="form" class="side-form" (ngSubmit)="onSignUp()">
+                <mat-form-field class="side-form_field">
+                    <mat-label>First Name</mat-label>
+                    <input id="firstName" matInput
+                            placeholder="First Name"
+                            [formControl]="firstName">
+                    <mat-error *ngIf="firstName.hasError('required')">
+                        First Name is required
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field class="side-form_field">
+                    <mat-label>Last Name</mat-label>
+                    <input id="lastName" matInput
+                            placeholder="Last Name"
+                            [formControl]="lastName">
+                    <mat-error *ngIf="lastName.hasError('required')">
+                        Last Name is required
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field class="side-form_field">
+                    <mat-label>Middle Name</mat-label>
+                    <input id="middleName" matInput
+                            placeholder="Middle Name"
+                            [formControl]="middleName">
+                </mat-form-field>
+                <mat-form-field class="side-form_field">
+                    <mat-label>Email</mat-label>
+                    <input id="email" matInput
+                            placeholder="Email"
+                            [formControl]="email">
+                                <mat-error *ngIf="email.hasError('required')">
+                                    Email is required
+                                </mat-error>
+                    <mat-error *ngIf="email.hasError('email')">
+                        Invalid email
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field class="side-form_field">
+                    <mat-label>Gender</mat-label>
+                    <mat-select id="gender" matInput
+                                placeholder="Gender"
+                                [formControl]="gender">
+                                    <mat-option *ngFor="let genderItem of genders" [value]="genderItem.value">
+                                        {{genderItem.name}}
+                                    </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="gender.hasError('required')">
+                        Select a Gender
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field class="side-form_field">
+                    <mat-label>Country</mat-label>
+                    <mat-select id="country" matInput
+                                placeholder="Country"
+                                [formControl]="country"
+                                (valueChange)="onCountryChange($event)">
+                                    <mat-option *ngFor="let countryItem of countries" [value]="countryItem.value">
+                                        {{countryItem.name}}
+                                    </mat-option>    
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field class="side-form_field">
+                    <mat-label>City</mat-label>
+                    <mat-select id="city" matInput
+                                placeholder="City"
+                                [formControl]="city">
+                                    <mat-option *ngFor="let cityItem of cities" [value]="cityItem.value">
+                                        {{cityItem.name}}
+                                    </mat-option>            
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field class="side-form_field">
+                    <mat-label>Password</mat-label>
+                    <input [type]="showPassword ? 'text' : 'password'"
+                            id="password"
+                            matInput placeholder="Password"
+                            [formControl]="password">
+                            <button mat-icon-button matSuffix (click)="onPasswordVisibilityChange()"
+                                    [attr.aria-label]="'Hide password'"
+                                    [attr.aria-pressed]="!showPassword">
+                                        <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+                            </button>                
+                    <mat-error *ngIf="password.hasError('required')">
+                    Password is reqired
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field class="side-form_field">
+                    <mat-label>Confirm Password</mat-label>
+                    <input [type]="showConfirmPassword ? 'text' : 'password'"
+                            id="confirmPassword"
+                            matInput placeholder="Password"
+                            [formControl]="confirmPassword">
+                                <button mat-icon-button matSuffix (click)="onPasswordVisibilityChange(true)"
+                                        [attr.aria-label]="'Hide password'"
+                                        [attr.aria-pressed]="!showConfirmPassword">
+                                    <mat-icon>{{ showConfirmPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+                                </button>
+                    <mat-error *ngIf="confirmPassword.hasError('required')">
+                    Confiramtion is reqired
+                    </mat-error>
+                </mat-form-field>
+                <div class="side-form_error">
+                    <div *ngIf="hasError" class="login-form_error-text">{{ errorText }}</div>
+                </div>
+                <button mat-raised-button 
+                        class="auth-button"
+                        color="primary"
+                        type="submit"
+                        [disabled]="!form.touched || form.invalid || isLoading"
+                        [class.disabled]="!form.touched || form.invalid || isLoading">
+                    Register
+                </button>
+            </form>
+            <p class="login-text">Already have account?
+                <a routerLink="/login" class="form-link">Sign In</a>
+            </p>  
+        </ng-container>  
+        <ng-template #messageLoaded>
+            <div class="after-success">
+                <p class="auth-message">{{ messageText }}</p>
+                <p class="back-text">Go to 
+                    <a routerLink="/login" class="form-link">Sign In</a>
+                </p>    
+            </div>
+        </ng-template>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+<ng-container *ngIf="isLoaded; else loading">
+  <ng-container *ngIf="hasUsers; else noUsers">
+    <div class="user-contacts" fxLayout="row wrap" fxLayoutGap="16px">
+        <div class="connection-card" *ngFor="let user of users">
+            <app-contact-card [contact]="user"
+                              [usersToolCode]="usersToolCode">
+          </app-contact-card>
+        </div>
+    </div>
+  
+    <mat-paginator [pageSize]="pageSize"
+                  [pageIndex]="currentPage - 1"
+                  [length]="totalItemsCount"
+                  (page)="onPageChange($event)">
+    </mat-paginator>
+  </ng-container>
+    
+  <ng-template #noUsers>
+    <div class="no-connections-message">
+      Users not found.
+    </div>
+  </ng-template>
+</ng-container>
+
+<ng-template #loading>
+  <div class="loading-space">
+    <app-loading-panel [hasAbsolutePosition]="true"></app-loading-panel>
+  </div>
+</ng-template>  

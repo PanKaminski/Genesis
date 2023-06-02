@@ -1,0 +1,21 @@
+<mat-toolbar class="header">
+    <img [src]="logo" alt="Genesis" class="header-logo">
+    <span class="header-spacer"></span>
+  
+    <button mat-icon-button>
+        <mat-icon>notifications</mat-icon>
+    </button>
+  
+    <button mat-icon-button [matMenuTriggerFor]="profileMenu">
+      <img *ngIf="avatar; else profileIcon" [src]="avatar"class="header-profile-picture">
+      <ng-template #profileIcon>
+        <mat-icon>account_circle</mat-icon>
+      </ng-template>
+    </button>
+    <mat-menu #profileMenu="matMenu">
+      <button mat-menu-item>Profile Edit</button>
+      <button mat-menu-item (click)="onLogout()">Logout</button>
+    </mat-menu>
+  
+  </mat-toolbar>
+  

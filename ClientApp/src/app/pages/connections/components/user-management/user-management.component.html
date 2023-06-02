@@ -1,0 +1,32 @@
+<div class="workspace">
+    <div class="user-contacts">
+        <nav mat-tab-nav-bar>
+            <a mat-tab-link class="tab-link" 
+                            routerLink="/user-management/connections"
+                            (click)="activeLink = '/user-management/connections'"
+                            [active]="activeLink == '/user-management/connections'">
+                Connections
+            </a>
+            <a mat-tab-link class="tab-link"
+                            routerLink="/user-management/invites"
+                            (click)="activeLink = '/user-management/invites'"
+                            [active]="activeLink == '/user-management/invites'">
+                Invites
+            </a>
+            <a mat-tab-link class="tab-link"
+                            routerLink="/user-management/pendings"
+                            (click)="activeLink = '/user-management/pendings'"
+                            [active]="activeLink == '/user-management/pendings'">
+                Pendings
+            </a>
+            <a mat-tab-link class="tab-link"
+                            routerLink="/user-management/search"
+                            (click)="activeLink = '/user-management/search'"
+                            [active]="activeLink == '/user-management/search'">
+                Search
+            </a>
+        </nav> 
+
+        <router-outlet></router-outlet>
+      </div>      
+</div>

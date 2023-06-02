@@ -1,0 +1,109 @@
+<div class="side-editor-body">
+    <form #form="ngForm" class="side-editor-form" [formGroup]="formGroup">
+        <mat-tab-group class="form-tab">
+            <mat-tab [label]="tab.name" *ngFor="let tab of tabs">
+                <div class="form-fields-wrapper">
+                    <div class="avatar-wrapper" *ngIf="showAvatar(tab.name)">
+                        <img [src]="avatar" alt="Avatar">
+                    </div>
+                    <ng-container *ngFor="let control of getTabControls(tab.id)">
+                        <ng-container [ngSwitch]="control.type">
+
+                            <mat-form-field class="side-form_field" *ngSwitchCase="controlTypes.TextInput">
+                                <mat-label>{{control.name}}</mat-label>
+                                <input matInput [formControlName]="control.name" [placeholder]="control.name" [readonly]="control.isReadonly">
+                                <mat-error *ngIf="formGroup.get(control.name).invalid">{{ control.name }} is required</mat-error>
+                            </mat-form-field>
+                            
+                            <mat-form-field class="side-form_field" *ngSwitchCase="controlTypes.Select">
+                                <mat-label>{{control.name}}</mat-label>
+                                <mat-select [formControlName]="control.name" 
+                                            [placeholder]="control.name" 
+                                            [multiple]="isMultiSelect(control)" 
+                                            [readonly]="control.isReadonly">
+                                    <mat-option *ngFor="let item of control.items" [value]="item.value">
+                                        {{ item.name }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="formGroup.get(control.name).invalid">{{ control.name }} is required</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field class="side-form_field" *ngSwitchCase="controlTypes.TextArea">
+                                <mat-label>{{control.name}}</mat-label>
+                                <textarea matInput [formControlName]="control.name" 
+                                            [placeholder]="control.name" 
+                                                [readonly]="control.isReadonly"></textarea>
+                                <mat-error *ngIf="formGroup.get(control.name).invalid">{{ control.name }} is required</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field class="side-form_field" *ngSwitchCase="controlTypes.DatePicker">
+                                <mat-label>{{control.name}}</mat-label>
+                                <input matInput [matDatepicker]="pickerRef" 
+                                                [formControlName]="control.name"
+                                                [readonly]="control.isReadonly"
+                                                [matDatepicker]="pickerRef">
+                                <mat-datepicker-toggle matSuffix [for]="pickerRef"></mat-datepicker-toggle>
+                                <mat-datepicker startView="year" #pickerRef></mat-datepicker>
+                                <!--<mat-error *ngIf="formGroup.get(control.name).invalid">{{control.name}} is required</mat-error>-->
+                            </mat-form-field>
+                
+                            <div fxLayout="row wrap" fxLayoutGap="20px" *ngSwitchCase="controlTypes.Images">
+                                <mat-card class="image-placeholder" (click)="fileInput.click()">
+                                <input type="file" 
+                                        accept="image/*"
+                                        (change)="onFileSelected($event)"
+                                        [disabled]="updating"
+                                        style="display:none"
+                                        #fileInput>
+                                <mat-card-content>
+                                    <mat-icon class="upload-icon">add</mat-icon>
+                                </mat-card-content>
+                                </mat-card>
+                                <mat-card class="form-image" *ngFor="let image of imagesAlbum; let i = index">
+                                <img [src]="image.src" (click)="onImageOpen(i)" alt="image">
+                                <div class="form-image-actions">
+                                        <mat-icon class="form-image-actions_icon icon-avatar" 
+                                                (click)="onAvatarChange(image.id)">
+                                                image
+                                        </mat-icon>
+                                        <mat-icon class="form-image-actions_icon icon-delete" 
+                                                (click)="onRemoveImage(image.id)">
+                                                delete
+                                        </mat-icon>
+                                </div>
+                                </mat-card>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+    </form>
+</div>
+<div class="side-editor_actions" *ngIf="hasButtons">
+    <div class="side-editor_actions-group">
+        <div class="side-editor_actions-group-left" *ngIf="leftButtonsGroup">
+            <ng-container *ngFor="let leftButton of leftButtonsGroup">
+                <button mat-raised-button color="foreground" *ngIf="leftButton === buttonTypes.Close"
+                        (click)="onClose()">
+                        Close
+                </button>
+            </ng-container>
+        </div>
+        <div class="side-editor_actions-group-right" *ngIf="rightButtonsGroup">
+            <ng-container *ngFor="let rightButton of rightButtonsGroup">
+                <button mat-raised-button color="warn" *ngIf="rightButton === buttonTypes.Delete && !isNew" 
+                        (click)="onDelete()"
+                        [disabled]="updating">
+                        Delete
+                </button>
+                <button mat-raised-button color="accent"  *ngIf="rightButton === buttonTypes.Save"
+                        type="submit" 
+                        [disabled]="!canSave || updating"
+                        (click)="onSave()">
+                        Save
+                </button>
+            </ng-container>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,21 @@
+<mat-card class="tree-card">
+    <ng-container class="image-container">
+        <img [src]="treeCard.photo ? treeCard.photo : defaultCardPicture" [alt]="treeCard.name">
+        <span class="owned-icon" *ngIf="treeCard.isOwned">
+          <mat-icon>emoji_events</mat-icon>
+        </span>
+    </ng-container>
+    <mat-card-content class="tree-info">
+        <mat-card-title class="tree-card_title" 
+                        [routerLink]="['/dashboard/tree', treeCard.id]">
+          {{ treeCard.name }}
+        </mat-card-title>
+        <mat-card-subtitle>{{ treeCard.personsCount }} person(s)</mat-card-subtitle>
+        <p>Last updated: {{ treeCard.lastUpdate }}</p>
+    </mat-card-content>
+    <mat-card-actions class="card-actions">
+        <span class="card-actions_link form-link" 
+              *ngIf="treeCard.isOwned"
+              (click)="onEdit()">Edit</span>
+    </mat-card-actions>
+</mat-card>

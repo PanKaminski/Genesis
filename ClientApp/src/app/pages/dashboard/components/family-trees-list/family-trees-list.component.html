@@ -1,0 +1,8 @@
+
+<div class="workspace">
+    <div *ngIf="trees"
+         fxLayout="row wrap" 
+         fxLayoutGap="16px">
+        <app-tree-card *ngFor="let treeCard of trees" [treeCard]="treeCard"></app-tree-card>
+    </div>
+</div>

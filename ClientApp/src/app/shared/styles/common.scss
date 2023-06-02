@@ -1,0 +1,43 @@
+$base-font-family: "Roboto", sans-serif;
+$logo-font-family: "Walter Turncoat", sans-serif;
+
+$font-weight-100: 100;
+$font-weight-300: 300;
+$font-weight-400: 400;
+$font-weight-700: 700;
+$font-weight-bold: bold;
+$font-weight-normal: normal;
+
+$project-primary: #1A4DCF;
+$project-primary-lighter: #bacaf1;
+$project-primary-darker: #0f34bd;
+$project-white: #fff;
+$background-grey: #eee;
+
+$dark-text: #000000;
+$dark-primary-text: rgba($dark-text, 0.87);
+$dark-accent-text: rgba($dark-primary-text, 0.54);
+$dark-disabled-text: rgba($dark-primary-text, 0.38);
+$dark-dividers: rgba($dark-primary-text, 0.12);
+$dark-focused: rgba($dark-primary-text, 0.12);
+
+$light-text: $project-white;
+$light-primary-text: $light-text;
+$light-accent-text: rgba($light-primary-text, 0.7);
+$light-disabled-text: rgba($light-primary-text, 0.5);
+$light-dividers: rgba($light-primary-text, 0.12);
+$light-focused: rgba($light-primary-text, 0.12);
+
+$project-accent: #50d7a6;
+$project-accent-lighter: #cbf3e4;
+$project-accent-darker: #37c78b;
+
+$project-warn: #ff0000;
+$project-warn-lighter: #ffb3b3;
+$project-warn-darker: #ff0000;
+
+
+$header-height: 50px;
+$menu-width: 60px;
+
+$buttons-area: 50px;

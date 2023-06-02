@@ -1,0 +1,68 @@
+@import "../../../../shared/styles/common";
+
+.tree-card {
+    background-color: $project-white;
+    display: flex;
+    margin-top: 16px;
+    flex-direction: column;
+    width: 200px;
+    height: 350px;
+    position: relative;
+}
+  
+  .image-container {
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.owned-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 8px;
+
+    mat-icon {
+        color: $project-primary;
+    }
+}
+  
+.tree-info {
+    text-align: center;
+    padding: 16px;
+    height: 100%;
+  }
+  
+  .tree-card_title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: $project-primary;
+    cursor: pointer;
+  }
+  
+  .mat-card-subtitle {
+    font-size: 14px;
+    color: gray;
+    margin-bottom: 8px;
+  }
+  
+  .mat-card-content {
+    height: calc(100% - 48px);
+  }
+  
+  .card-actions {
+    padding: 20px 0 30px 20px;
+    &_link {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+  }

@@ -1,0 +1,86 @@
+@import "../../../../shared/styles/common.scss";
+
+.contact-card {
+    height: 300px;
+    max-width: 500px;
+    margin-top: 15px;
+    border-radius: 20px;
+
+    &_image {
+        float: left;
+        overflow: hidden;
+        margin-right: 16px;
+        border-radius: 50%;
+        object-fit: cover;
+        border-top-left-radius: 50%;
+        height: 200px;
+        width: 200px;    
+    }
+
+    &_header {
+        padding: 10px 20px;
+        overflow: hidden;
+    }
+
+    &_details {
+        float: right;
+        overflow: hidden;
+        height: 100%;
+        margin-left: 15px;
+
+        mat-card-title {
+            font-weight: $font-weight-700;
+            font-size: 24px;
+            flex: 1;
+        }
+
+        .contact-card-icons {
+            margin-top: 20px;
+            margin-left: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: max-content;
+            gap: 15px;
+
+            .icon-container {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 15px;
+
+                &_info {
+                    margin-left: 10px;
+                    display: flex;
+                    flex-direction: column;
+
+                    .text-label {
+                        font-size: small;
+                        color: $dark-disabled-text;
+                    }
+
+                    .text-content {
+                        color: $dark-accent-text;
+                        font-weight: $font-weight-bold;
+                        font-size: 16px;
+                    }
+                }
+
+                &_icon {
+                    transform: scale(1.4);
+                }
+            }
+        }
+    }
+
+    mat-card-actions {
+        display: flex;
+        justify-content: flex-end;
+        padding: 16px;
+    }
+}
+    
+.mdc-card__media:first-child {
+  border-top-left-radius: 50%;
+  border-top-right-radius: 50%;
+}

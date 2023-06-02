@@ -1,0 +1,49 @@
+@use '@angular/material' as mat;
+@import "common";
+@import '@angular/material/theming';
+
+$mat-primary: (
+  main: $project-primary,
+  lighter: $project-primary-lighter,
+  darker: $project-primary-darker,
+  200: $project-primary, // For slide toggle,
+  contrast : (
+    main: $light-primary-text,
+    lighter: $dark-primary-text,
+    darker: $light-primary-text,
+  )
+);
+
+$theme-primary: mat-palette($mat-primary, main, lighter, darker);
+
+$mat-accent: (
+  main: $project-accent,
+  lighter: $project-accent-lighter,
+  darker: $project-accent-darker,
+  200: $project-accent, // For slide toggle,
+  contrast : (
+    main: $dark-primary-text,
+    lighter: $dark-primary-text,
+    darker: $dark-primary-text,
+  )
+);
+
+$theme-accent: mat-palette($mat-accent, main, lighter, darker);
+
+$mat-warn: (
+  main: $project-warn,
+  lighter: $project-warn-lighter,
+  darker: $project-warn-darker,
+  200: $project-warn, // For slide toggle,
+  contrast : (
+    main: $light-primary-text,
+    lighter: $dark-primary-text,
+    darker: $light-primary-text,
+  )
+);
+
+$theme-warn: mat-palette($mat-warn, main, lighter, darker);
+
+$theme: mat-light-theme($theme-primary, $theme-accent, $theme-warn);
+
+@include angular-material-theme($theme);

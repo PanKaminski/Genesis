@@ -1,0 +1,9 @@
+<div class="verify form-container">
+    <h1 class="form-container_header">Verify <span>Email</span></h1>
+    <div class="loading" *ngIf="!errorText; else error">
+        Loading
+    </div>
+    <ng-template #error>
+        <div class="verify-error">{{errorText}}</div>
+    </ng-template>    
+</div>

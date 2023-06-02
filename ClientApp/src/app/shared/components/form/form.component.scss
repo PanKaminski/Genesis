@@ -1,0 +1,53 @@
+@import "../../styles/side-forms.scss";
+
+.form-image {
+    width: 105px;
+    height: 105px;
+    margin-top: 16px;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover
+    }
+
+    &-actions {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: row;
+        height: max-content;
+
+        &_icon {
+            cursor: pointer;
+        }
+    }
+}
+
+.image-placeholder {
+    width: 105px;
+    height: 105px;
+    background: linear-gradient(45deg, $project-primary-lighter, $project-accent-lighter);
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    margin-top: 16px;
+
+    mat-card-content{
+        width: 100%;
+        height: 100%;
+        .upload-icon {
+            position: absolute;
+            top: 13%;
+            left: 13%;
+            width: fit-content;
+            height: fit-content;
+            font-size: 72px;
+            color: $dark-accent-text;
+        }        
+    }
+    &:hover {
+        filter: blur(2px);
+    }
+}  

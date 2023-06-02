@@ -1,0 +1,51 @@
+<div class="login form-container">
+    <h1 class="form-container_header">Welcome <span>Back</span></h1>
+    <div class="form-container_body">
+        <form [formGroup]="form" class="side-form" (ngSubmit)="onSignIn()">
+            <mat-form-field class="side-form_field email">
+                <mat-label>Email</mat-label>
+                <input id="email" matInput
+                        placeholder="Email"
+                        [formControl]="email">
+                <mat-error *ngIf="email.hasError('required')">
+                    Email is required
+                </mat-error>
+                <mat-error *ngIf="email.hasError('email')">
+                    Invalid email
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field class="side-form_field password">
+                <mat-label>Password</mat-label>
+                <input [type]="showPassword ? 'text' : 'password'"
+                       id="password"
+                       matInput placeholder="Password"
+                       [formControl]="password">
+                            <button mat-icon-button matSuffix (click)="onPasswordVisibilityChange()"
+                            [attr.aria-label]="'Hide password'"
+                            [attr.aria-pressed]="!showPassword">
+                                <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+                            </button>                
+                <mat-error *ngIf="password.hasError('required')">
+                  Password is reqired
+                </mat-error>
+            </mat-form-field>
+            <div class="side-form_restore-link">
+                <a routerLink="/restore" class="form-link">Forgot password</a>
+            </div>
+            <div class="side-form_error">
+                <div *ngIf="hasError" class="login-form_error-text">{{ errorText }}</div>
+            </div>
+            <button mat-raised-button 
+                    class="auth-button"
+                    color="primary"
+                    type="submit"
+                    [disabled]="!form.touched || form.invalid || isLoading"
+                    [class.disabled]="!form.touched || form.invalid || isLoading">
+                Login
+            </button>
+        </form>
+        <p class="new-account-text">Don't have an account?
+            <a routerLink="/register" class="form-link">Sign Up</a>
+        </p>
+    </div>
+</div>

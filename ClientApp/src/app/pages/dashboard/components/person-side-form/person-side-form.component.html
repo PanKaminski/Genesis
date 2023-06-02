@@ -1,0 +1,37 @@
+<div class="side-editor">
+    <ng-container *ngIf="formLoaded; else loadingPanel">
+        <app-form [form]="form"
+                  [hasAvatar]="true"
+                  [isNew]="isNewPerson"
+                  [avatarTemplate]="emptyAvatarTemplate"
+                  [updating]="updating"
+                  (updateAvatar)="onAvatarChange($event)"
+                  (removeImage)="onRemoveImage($event)"
+                  (addImages)="onAddImages($event)"
+                  (closeForm)="onClose()"
+                  (deleteFormItem)="onDelete()"
+                  (saveForm)="onSave($event)">
+        </app-form>
+    </ng-container>
+    <ng-template #loadingPanel>
+        <app-loading-panel></app-loading-panel>
+    </ng-template>    
+</div>
+
+<ng-template #deleteConfirmation>
+    <h2 mat-dialog-title>Confirm Delete</h2>
+    <mat-dialog-content>Are you sure you want to delete {{person.firstName}} {{person.lastName}}?</mat-dialog-content>
+    <mat-dialog-actions>
+        <button mat-button mat-dialog-close>No</button>
+        <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Yes</button>
+    </mat-dialog-actions>
+</ng-template>
+<!-- dialog for image cropping -->
+
+<ng-template #cropDialog>
+    <h2 mat-dialog-title>Crop Image</h2>
+    <mat-dialog-content>
+        <img-cropper [image]="selectedImage" [settings]="cropSettings" (onCrop)="saveCroppedImage($event)">
+        </img-cropper>
+    </mat-dialog-content>
+</ng-template>
