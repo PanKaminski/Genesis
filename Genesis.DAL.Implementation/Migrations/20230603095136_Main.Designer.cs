@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Genesis.DAL.Implementation.Migrations
 {
     [DbContext(typeof(GenesisDbContext))]
-    [Migration("20230521142340_Connections")]
-    partial class Connections
+    [Migration("20230603095136_Main")]
+    partial class Main
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -364,10 +364,15 @@ namespace Genesis.DAL.Implementation.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("genealogical_trees", (string)null);
                 });
@@ -499,16 +504,16 @@ namespace Genesis.DAL.Implementation.Migrations
                     b.Property<DateTime>("CreatedTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("GenealogicalTreeId")
+                    b.Property<int?>("GenealogicalTreeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("HistoricalNotationId")
+                    b.Property<int?>("HistoricalNotationId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsMain")
                         .HasColumnType("bit");
 
-                    b.Property<int>("PersonId")
+                    b.Property<int?>("PersonId")
                         .HasColumnType("int");
 
                     b.Property<string>("PublicId")
@@ -523,7 +528,8 @@ namespace Genesis.DAL.Implementation.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GenealogicalTreeId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[GenealogicalTreeId] IS NOT NULL");
 
                     b.HasIndex("HistoricalNotationId");
 
@@ -652,6 +658,17 @@ namespace Genesis.DAL.Implementation.Migrations
                     b.Navigation("HistoricalNotation");
                 });
 
+            modelBuilder.Entity("Genesis.DAL.Contract.Dtos.GenealogicalTreeDto", b =>
+                {
+                    b.HasOne("Genesis.DAL.Contract.Dtos.Account.AccountDto", "Owner")
+                        .WithMany("PersonalTrees")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("Genesis.DAL.Contract.Dtos.HistoricalNotationDto", b =>
                 {
                     b.HasOne("Genesis.DAL.Contract.Dtos.AddressDto", "Place")
@@ -710,21 +727,16 @@ namespace Genesis.DAL.Implementation.Migrations
                 {
                     b.HasOne("Genesis.DAL.Contract.Dtos.GenealogicalTreeDto", "GenealogicalTree")
                         .WithOne("CoatOfArms")
-                        .HasForeignKey("Genesis.DAL.Contract.Dtos.PictureDto", "GenealogicalTreeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Genesis.DAL.Contract.Dtos.PictureDto", "GenealogicalTreeId");
 
                     b.HasOne("Genesis.DAL.Contract.Dtos.HistoricalNotationDto", "HistoricalNotation")
                         .WithMany("Pictures")
-                        .HasForeignKey("HistoricalNotationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("HistoricalNotationId");
 
                     b.HasOne("Genesis.DAL.Contract.Dtos.PersonDto", "Person")
                         .WithMany("Photos")
                         .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("GenealogicalTree");
 
@@ -738,6 +750,8 @@ namespace Genesis.DAL.Implementation.Migrations
                     b.Navigation("IncomingConnections");
 
                     b.Navigation("OutgoingConnections");
+
+                    b.Navigation("PersonalTrees");
 
                     b.Navigation("RefreshTokens");
 

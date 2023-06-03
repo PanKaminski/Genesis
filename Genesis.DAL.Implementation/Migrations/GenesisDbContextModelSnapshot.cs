@@ -362,10 +362,15 @@ namespace Genesis.DAL.Implementation.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("genealogical_trees", (string)null);
                 });
@@ -651,6 +656,17 @@ namespace Genesis.DAL.Implementation.Migrations
                     b.Navigation("HistoricalNotation");
                 });
 
+            modelBuilder.Entity("Genesis.DAL.Contract.Dtos.GenealogicalTreeDto", b =>
+                {
+                    b.HasOne("Genesis.DAL.Contract.Dtos.Account.AccountDto", "Owner")
+                        .WithMany("PersonalTrees")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("Genesis.DAL.Contract.Dtos.HistoricalNotationDto", b =>
                 {
                     b.HasOne("Genesis.DAL.Contract.Dtos.AddressDto", "Place")
@@ -732,6 +748,8 @@ namespace Genesis.DAL.Implementation.Migrations
                     b.Navigation("IncomingConnections");
 
                     b.Navigation("OutgoingConnections");
+
+                    b.Navigation("PersonalTrees");
 
                     b.Navigation("RefreshTokens");
 

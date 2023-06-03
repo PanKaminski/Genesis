@@ -285,7 +285,7 @@ namespace Genesis.App.Implementation.Forms
                     {
                         items = RootPersonRelations.Where(r => r.RelationType == Relation.Partners)
                             .Select(r => r.FromPersonId == linkedPerson.Id ? new SelectItem(r.ToPerson.FullName, r.ToPersonId.ToString())
-                            : new SelectItem(r.FromPerson.FullName, r.FromPerson.ToString())).ToList();
+                            : new SelectItem(r.FromPerson.FullName, r.FromPersonId.ToString())).ToList();
                     }
                     break;
                 case ControlEntityType.Children:

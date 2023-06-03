@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Genesis.DAL.Implementation.Migrations
 {
-    public partial class Initial : Migration
+    public partial class Main : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -31,23 +31,6 @@ namespace Genesis.DAL.Implementation.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_accounts", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "genealogical_trees",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ChangedByAccount = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_genealogical_trees", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -79,6 +62,59 @@ namespace Genesis.DAL.Implementation.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "account_connections",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AccountFromId = table.Column<int>(type: "int", nullable: false),
+                    AccountToId = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedTime = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_account_connections", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_account_connections_accounts_AccountFromId",
+                        column: x => x.AccountFromId,
+                        principalTable: "accounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_account_connections_accounts_AccountToId",
+                        column: x => x.AccountToId,
+                        principalTable: "accounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "genealogical_trees",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OwnerId = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ChangedByAccount = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_genealogical_trees", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_genealogical_trees_accounts_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "accounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "refresh_tokens",
                 columns: table => new
                 {
@@ -100,6 +136,53 @@ namespace Genesis.DAL.Implementation.Migrations
                         name: "FK_refresh_tokens_accounts_AccountId",
                         column: x => x.AccountId,
                         principalTable: "accounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "notations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PlaceId = table.Column<int>(type: "int", nullable: true),
+                    CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ChangedByAccount = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_notations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_notations_locations_PlaceId",
+                        column: x => x.PlaceId,
+                        principalTable: "locations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "persons_roles",
+                columns: table => new
+                {
+                    AccountsId = table.Column<int>(type: "int", nullable: false),
+                    RolesId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_persons_roles", x => new { x.AccountsId, x.RolesId });
+                    table.ForeignKey(
+                        name: "FK_persons_roles_accounts_AccountsId",
+                        column: x => x.AccountsId,
+                        principalTable: "accounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_persons_roles_roles_RolesId",
+                        column: x => x.RolesId,
+                        principalTable: "roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -162,50 +245,26 @@ namespace Genesis.DAL.Implementation.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "notations",
+                name: "documents",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PlaceId = table.Column<int>(type: "int", nullable: true),
+                    Path = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FileType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HistoricalNotationId = table.Column<int>(type: "int", nullable: true),
                     CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ChangedByAccount = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_notations", x => x.Id);
+                    table.PrimaryKey("PK_documents", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_notations_locations_PlaceId",
-                        column: x => x.PlaceId,
-                        principalTable: "locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "persons_roles",
-                columns: table => new
-                {
-                    AccountsId = table.Column<int>(type: "int", nullable: false),
-                    RolesId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_persons_roles", x => new { x.AccountsId, x.RolesId });
-                    table.ForeignKey(
-                        name: "FK_persons_roles_accounts_AccountsId",
-                        column: x => x.AccountsId,
-                        principalTable: "accounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_persons_roles_roles_RolesId",
-                        column: x => x.RolesId,
-                        principalTable: "roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_documents_notations_HistoricalNotationId",
+                        column: x => x.HistoricalNotationId,
+                        principalTable: "notations",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -245,6 +304,42 @@ namespace Genesis.DAL.Implementation.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "pictures",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PublicId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsMain = table.Column<bool>(type: "bit", nullable: false),
+                    HistoricalNotationId = table.Column<int>(type: "int", nullable: true),
+                    GenealogicalTreeId = table.Column<int>(type: "int", nullable: true),
+                    PersonId = table.Column<int>(type: "int", nullable: true),
+                    CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedTime = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_pictures", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_pictures_genealogical_trees_GenealogicalTreeId",
+                        column: x => x.GenealogicalTreeId,
+                        principalTable: "genealogical_trees",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_pictures_notations_HistoricalNotationId",
+                        column: x => x.HistoricalNotationId,
+                        principalTable: "notations",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_pictures_persons_PersonId",
+                        column: x => x.PersonId,
+                        principalTable: "persons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "relations",
                 columns: table => new
                 {
@@ -280,61 +375,24 @@ namespace Genesis.DAL.Implementation.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "documents",
+                name: "persons_documents",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Path = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FileType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    HistoricalNotationId = table.Column<int>(type: "int", nullable: true),
-                    CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ChangedByAccount = table.Column<int>(type: "int", nullable: true)
+                    PersonsId = table.Column<int>(type: "int", nullable: false),
+                    RelatedDocumentsId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_documents", x => x.Id);
+                    table.PrimaryKey("PK_persons_documents", x => new { x.PersonsId, x.RelatedDocumentsId });
                     table.ForeignKey(
-                        name: "FK_documents_notations_HistoricalNotationId",
-                        column: x => x.HistoricalNotationId,
-                        principalTable: "notations",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "pictures",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Url = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PublicId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsMain = table.Column<bool>(type: "bit", nullable: false),
-                    HistoricalNotationId = table.Column<int>(type: "int", nullable: false),
-                    GenealogicalTreeId = table.Column<int>(type: "int", nullable: false),
-                    PersonId = table.Column<int>(type: "int", nullable: false),
-                    CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedTime = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_pictures", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_pictures_genealogical_trees_GenealogicalTreeId",
-                        column: x => x.GenealogicalTreeId,
-                        principalTable: "genealogical_trees",
+                        name: "FK_persons_documents_documents_RelatedDocumentsId",
+                        column: x => x.RelatedDocumentsId,
+                        principalTable: "documents",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_pictures_notations_HistoricalNotationId",
-                        column: x => x.HistoricalNotationId,
-                        principalTable: "notations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_pictures_persons_PersonId",
-                        column: x => x.PersonId,
+                        name: "FK_persons_documents_persons_PersonsId",
+                        column: x => x.PersonsId,
                         principalTable: "persons",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -364,30 +422,6 @@ namespace Genesis.DAL.Implementation.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "persons_documents",
-                columns: table => new
-                {
-                    PersonsId = table.Column<int>(type: "int", nullable: false),
-                    RelatedDocumentsId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_persons_documents", x => new { x.PersonsId, x.RelatedDocumentsId });
-                    table.ForeignKey(
-                        name: "FK_persons_documents_documents_RelatedDocumentsId",
-                        column: x => x.RelatedDocumentsId,
-                        principalTable: "documents",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_persons_documents_persons_PersonsId",
-                        column: x => x.PersonsId,
-                        principalTable: "persons",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.InsertData(
                 table: "roles",
                 columns: new[] { "Id", "RoleName" },
@@ -402,6 +436,16 @@ namespace Genesis.DAL.Implementation.Migrations
                 table: "roles",
                 columns: new[] { "Id", "RoleName" },
                 values: new object[] { 3, "ArchiveWorker" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_connections_AccountFromId",
+                table: "account_connections",
+                column: "AccountFromId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_account_connections_AccountToId",
+                table: "account_connections",
+                column: "AccountToId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_biographies_BirthPlaceId",
@@ -429,6 +473,11 @@ namespace Genesis.DAL.Implementation.Migrations
                 name: "IX_events_biographies_EventsId",
                 table: "events_biographies",
                 column: "EventsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_genealogical_trees_OwnerId",
+                table: "genealogical_trees",
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_notations_PlaceId",
@@ -461,7 +510,8 @@ namespace Genesis.DAL.Implementation.Migrations
                 name: "IX_pictures_GenealogicalTreeId",
                 table: "pictures",
                 column: "GenealogicalTreeId",
-                unique: true);
+                unique: true,
+                filter: "[GenealogicalTreeId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_pictures_HistoricalNotationId",
@@ -502,6 +552,9 @@ namespace Genesis.DAL.Implementation.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "account_connections");
+
+            migrationBuilder.DropTable(
                 name: "events_biographies");
 
             migrationBuilder.DropTable(
@@ -538,13 +591,13 @@ namespace Genesis.DAL.Implementation.Migrations
                 name: "notations");
 
             migrationBuilder.DropTable(
-                name: "accounts");
-
-            migrationBuilder.DropTable(
                 name: "genealogical_trees");
 
             migrationBuilder.DropTable(
                 name: "locations");
+
+            migrationBuilder.DropTable(
+                name: "accounts");
         }
     }
 }

@@ -85,10 +85,11 @@ namespace Genesis.DAL.Implementation.Context
                 .WithOne(n => n.Place)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            modelBuilder.Entity<GenealogicalTreeDto>()
-                .HasOne(gt => gt.Owner)
-                .WithMany(a => a.PersonalTrees)
-                .HasForeignKey(gt => gt.OwnerId);
+            modelBuilder.Entity<AccountDto>()
+                .HasMany(a => a.PersonalTrees)
+                .WithOne(t => t.Owner)
+                .HasForeignKey(t => t.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<GenealogicalTreeDto>()
                 .HasOne(gt => gt.CoatOfArms)
