@@ -11,6 +11,8 @@ public interface IAccountsRepository
 
     IList<AccountDto> Get(IList<AccountLoadOptions> loadOptions = null);
 
+    IEnumerable<AccountDto> Get(IEnumerable<int> ids, bool trackEntities, IList<AccountLoadOptions> loadOptions = null);
+
     AccountDto GetByEmail(string email, IList<AccountLoadOptions> loadOptions = null);
 
     AccountDto GetById(int id, IList<AccountLoadOptions> loadOptions = null);

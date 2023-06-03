@@ -61,7 +61,7 @@ namespace Genesis.App.Implementation.Forms
             await relationsService.AddRelationsAsync(relations, treeId, true);
         }
 
-        protected override IEnumerable<Control> CreateFormControls()
+        protected override IEnumerable<Control> CreateFormControls(Person person)
         {
             var linkedPerson = personRelation.ToPerson ?? personRelation.FromPerson;
             return new List<Control>()

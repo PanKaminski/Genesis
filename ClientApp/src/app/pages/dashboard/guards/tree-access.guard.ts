@@ -7,7 +7,7 @@ import { FamilyTreeService } from "../services/family-trees.service";
 @Injectable({
     providedIn: 'root'
   })
-  export class AuthGuard implements CanActivate {
+  export class TreeAccessGuard implements CanActivate {
     constructor(
       private readonly router: Router,
       private readonly familyTreeService: FamilyTreeService

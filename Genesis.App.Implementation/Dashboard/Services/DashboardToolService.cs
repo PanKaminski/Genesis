@@ -112,7 +112,7 @@ namespace Genesis.App.Implementation.Dashboard.Services
 
             var tree = treeService.GetTreeWithModifiers(treeId);
 
-            return tree is not null && tree.Modifiers.Any(m => m.Id == accountId);
+            return tree is not null && (tree.OwnerId == accountId || tree.Modifiers.Any(m => m.Id == accountId));
         }
 
         public Form GetTreeForm(int treeId, string currentUserId)

@@ -21,5 +21,7 @@ namespace Genesis.App.Contract.Common.Services
         void RemovePictures(IEnumerable<int> picturesIds, bool saveChanges);
 
         void MakeAvatar(int personId, int pictureId, bool saveChanges);
+
+        void ChangeCoatOfArms(int treeId, Picture picture, bool saveChanges);
     }
 }

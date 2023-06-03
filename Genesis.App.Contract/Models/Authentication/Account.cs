@@ -5,6 +5,16 @@ namespace Genesis.App.Contract.Models.Authentication;
 
 public class Account : AuditableEntity
 {
+    public Account()
+    {
+
+    }
+
+    public Account(int id)
+    {
+        Id = id;
+    }
+
     public string Login { get; set; }
 
     public IList<Role> Roles { get; set; }

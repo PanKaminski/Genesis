@@ -130,6 +130,15 @@ namespace Genesis.DAL.Implementation.Repositories
 
         public bool Exists(string email) => DbContext.Accounts.TryGetSingleValue(a => a.Login == email, out _);
 
+        public IEnumerable<AccountDto> Get(IEnumerable<int> ids, bool trackEntities, IList<AccountLoadOptions> loadOptions = null)
+        {
+            var model = PrepareModel(loadOptions);
+
+            if (!trackEntities) model = model.AsNoTracking();
+
+            return model.Where(acc => ids.Contains(acc.Id));
+        }
+
         private IQueryable<AccountDto> PrepareModel(IList<AccountLoadOptions> loadOptions)
         {
             IQueryable<AccountDto> model = DbContext.Accounts.Include(acc => acc.RefreshTokens).Include(acc => acc.Roles);

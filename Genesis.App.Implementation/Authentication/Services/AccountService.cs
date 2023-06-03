@@ -256,10 +256,17 @@ public class AccountService : IAccountService
 
     public IEnumerable<Account> GetConnections(int accountId)
     {
-        var accountsModel = this.unitOfWork.AccountsRepository.GetConnections(
+        var accountsModel = unitOfWork.AccountsRepository.GetConnections(
             accountId, ConnectionStatus.Accepted, true, true,
             false, new List<AccountLoadOptions> { AccountLoadOptions.WithFullPersonData, AccountLoadOptions.WithConnections }
             );
+
+        return mapper.Map<IEnumerable<Account>>(accountsModel);
+    }
+
+    public IEnumerable<Account> GetAccounts(IEnumerable<int> accountIds)
+    {
+        var accountsModel = unitOfWork.AccountsRepository.Get(accountIds, true);
 
         return mapper.Map<IEnumerable<Account>>(accountsModel);
     }

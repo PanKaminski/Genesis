@@ -1,5 +1,8 @@
 ﻿using Genesis.App.Contract.Authentication.Services;
+using Genesis.App.Contract.Common.ApiModels;
+using Genesis.App.Contract.Dashboard.Services;
 using Genesis.App.Contract.Models;
+using Genesis.App.Contract.Models.Authentication;
 using Genesis.App.Contract.Models.Forms;
 
 namespace Genesis.App.Implementation.Forms
@@ -7,11 +10,15 @@ namespace Genesis.App.Implementation.Forms
     public class GenealogicalTreeFormBuilder : FormBuilder<GenealogicalTree>
     {
         private readonly IAccountService accountService;
+        private readonly IGenealogicalTreeService treeService;
         private readonly int currentUserId;
 
-        public GenealogicalTreeFormBuilder(IAccountService accountService, int currentUserId)
+        public GenealogicalTreeFormBuilder(IAccountService accountService,
+            IGenealogicalTreeService treeService, int currentUserId)
         {
             this.accountService = accountService;
+            this.currentUserId = currentUserId;
+            this.treeService = treeService;
         }
 
         protected override List<FormTab> FormTabs => new List<FormTab>
@@ -19,7 +26,31 @@ namespace Genesis.App.Implementation.Forms
             new FormTab(1, "Common"),
         };
 
-        protected override IEnumerable<Control> CreateFormControls()
+        public async Task SaveFormAsync(GenealogicalTree tree, IEnumerable<ControlValue> formValues, SavePictureRequest picture)
+        {
+            if (picture is not null)
+            {
+                tree.CoatOfArms = new Picture(picture.Url, picture.PublicId, true);
+            }
+
+            foreach (var formValue in formValues)
+            {
+                UpdateTreeModel(formValue, tree);
+            }
+
+            if (tree.Id > 0)
+            {
+                await treeService.UpdateTreeAsync(tree, true);
+            }
+            else
+            {
+                tree.OwnerId = currentUserId;
+                var id = await treeService.AddTreeAsync(tree, true);
+                tree.Id = id;
+            }
+        }
+
+        protected override IEnumerable<Control> CreateFormControls(GenealogicalTree tree)
         {
             return new List<Control>
             {
@@ -29,6 +60,7 @@ namespace Genesis.App.Implementation.Forms
                     Type = ControlType.TextInput,
                     Name = "Name",
                     IsRequired = true,
+                    IsReadonly = tree is not null && tree.OwnerId != currentUserId,
                     TabId = 1,
                 },
                 new Control
@@ -36,18 +68,27 @@ namespace Genesis.App.Implementation.Forms
                     EntityType = ControlEntityType.Modifiers,
                     Type = ControlType.Select,
                     Name = "Modifiers",
-                    IsRequired = true,
+                    IsRequired = false,
+                    IsReadonly = tree is not null && tree.OwnerId != currentUserId,
                     TabId = 1,
-                }
+                },
+                new Control
+                {
+                    EntityType = ControlEntityType.Pictures,
+                    Type = ControlType.Image,
+                    Name = "Photos",
+                    IsReadonly = tree is not null && tree.OwnerId != currentUserId,
+                    TabId = 1,
+                },
             };
         }
 
-        protected override List<ButtonType> GetButtonTypes(GenealogicalTree model)
+        protected override List<ButtonType> GetButtonTypes(GenealogicalTree tree)
         {
             var buttons = new List<ButtonType> { ButtonType.Close };
 
-            if (model is not null && model.Id > 0) buttons.Add(ButtonType.Delete);
-            buttons.Add(ButtonType.Save);
+            if (tree is not null && tree.Id > 0 && tree.OwnerId == currentUserId) buttons.Add(ButtonType.Delete);
+            if (tree is null || tree.Id < 1 || tree.OwnerId == currentUserId) buttons.Add(ButtonType.Save);
 
             return buttons;
         }
@@ -68,16 +109,42 @@ namespace Genesis.App.Implementation.Forms
             return items;
         }
 
-        protected override object GetControlValue(Control control, GenealogicalTree model)
+        protected override object GetControlValue(Control control, GenealogicalTree tree)
         {
             switch (control.EntityType)
             {
-                case ControlEntityType.Modifiers when model?.Modifiers is not null:
-                    return model.Modifiers.Select(m => m.Id.ToString()).ToList();
+                case ControlEntityType.Modifiers when tree?.Modifiers is not null:
+                    return tree.Modifiers.Select(m => m.Id.ToString()).ToList();
                 case ControlEntityType.Name:
-                    return model?.Name;
+                    return tree?.Name;
+                case ControlEntityType.Pictures when tree?.CoatOfArms is not null:
+                    {
+                        var ph = tree.CoatOfArms;
+                        return new PictureResponse
+                        {
+                            Id = ph.Id,
+                            Url = ph.Url,
+                            PublicId = ph.PublicId
+                        };
+                    }
                 default:
                     throw new KeyNotFoundException("Invalid entity type for tree form");
+            }
+        }
+
+        private void UpdateTreeModel(ControlValue value, GenealogicalTree tree)
+        {
+            switch (value.EntityType)
+            {
+                case ControlEntityType.Modifiers when value.TryGet(out List<string> modifiersIds) && modifiersIds is not null:
+                    tree.Modifiers = modifiersIds.Select(id => int.TryParse(id, out var idNumber) ? new Account(idNumber) : null)
+                        .Where(acc => acc is not null).ToList();
+                    break;
+                case ControlEntityType.Name when value.TryGet(out string treeName):
+                    tree.Name = treeName;
+                    break;
+                default:
+                    break;
             }
         }
     }

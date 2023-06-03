@@ -91,5 +91,13 @@ namespace Genesis.DAL.Implementation.Repositories
         {
             DbContext.Pictures.RemoveRange(DbContext.Pictures.Where(pic => pic.PersonId == personId));
         }
+
+        public void DeleteByTreeId(int treeId)
+        {
+            if (DbContext.Pictures.TryGetSingleValue(pic => pic.GenealogicalTreeId == treeId, out PictureDto picture))
+            {
+                DbContext.Pictures.Remove(picture);
+            }
+        }
     }
 }

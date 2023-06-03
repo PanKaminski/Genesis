@@ -30,4 +30,6 @@ public interface IAccountService
     Task<PagedModel<Account>> GetPendings(int accountId, int page, int pageSize);
 
     Task<PagedModel<Account>> SearchUsers(int accountId, int page, int pageSize);
+
+    IEnumerable<Account> GetAccounts(IEnumerable<int> accountIds);
 }

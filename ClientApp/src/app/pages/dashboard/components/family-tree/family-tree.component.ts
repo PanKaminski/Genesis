@@ -102,7 +102,6 @@ export class FamilyTreeComponent implements OnInit, OnDestroy {
     if (this.familyTree.getNode(node.id)) {
       this.familyTree.updateNode(node);
     } else {
-      console.log('add works');
       this.familyTree.addNode(node, null, true);
     }
   }
