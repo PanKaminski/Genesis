@@ -60,14 +60,20 @@ namespace Genesis.App.Implementation.Dashboard.Services
 
         public Person GetPersonWithGenealogicalTree(int id)
         {
-            var personDto = this.unitOfWork.PersonsRepository.GetPerson(id, PersonLoadOptions.WithGenealogicalTree);
+            var personDto = this.unitOfWork.PersonsRepository.GetPerson(id, new List<PersonLoadOptions> 
+            {
+                PersonLoadOptions.WithGenealogicalTree 
+            });
 
             return mapper.Map<Person>(personDto);
         }
 
         public Person GetPersonWithFullInfo(int id)
         {
-            var personDto = this.unitOfWork.PersonsRepository.GetPerson(id, PersonLoadOptions.Full);
+            var personDto = this.unitOfWork.PersonsRepository.GetPerson(id, new List<PersonLoadOptions> 
+            { 
+                PersonLoadOptions.Full,
+            });
 
             return mapper.Map<Person>(personDto);
         }
@@ -85,7 +91,10 @@ namespace Genesis.App.Implementation.Dashboard.Services
 
         public async Task EditPersonAsync(Person person, bool saveChanges = false)
         {
-            var personDto = this.unitOfWork.PersonsRepository.GetPerson(person.Id, PersonLoadOptions.WithBiography, true);
+            var personDto = this.unitOfWork.PersonsRepository.GetPerson(person.Id, new List<PersonLoadOptions>
+            {
+                PersonLoadOptions.WithBiography 
+            }, true);
 
             personDto.FirstName = person.FirstName;
             personDto.LastName = person.LastName;

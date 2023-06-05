@@ -11,7 +11,7 @@ namespace Genesis.DAL.Contract.Repositories
 
         PersonDto GetByAccount(int accountId);
 
-        PersonDto GetPerson(int id, PersonLoadOptions? loadOptions = null, bool trackPerson = false);
+        PersonDto GetPerson(int id, List<PersonLoadOptions> loadOptions = null, bool trackPerson = false);
 
         void RemovePerson(int personId);
     }

@@ -32,7 +32,7 @@ namespace Genesis.DAL.Implementation.Repositories
                 .Where(p => p.GenealogicalTreeId == treeId);
         }
 
-        public PersonDto GetPerson(int id, PersonLoadOptions? loadOptions = null, bool trackPerson = false)
+        public PersonDto GetPerson(int id, List<PersonLoadOptions> loadOptions = null, bool trackPerson = false)
         {
             var model = this.PrepareModel(loadOptions);
 
@@ -49,22 +49,31 @@ namespace Genesis.DAL.Implementation.Repositories
             throw new GenesisDalException("Person is not found", nameof(id));
         }
 
-        private IQueryable<PersonDto> PrepareModel(PersonLoadOptions? loadOptions) =>
-            loadOptions switch
+        private IQueryable<PersonDto> PrepareModel(List<PersonLoadOptions> loadOptions)
+        {
+            IQueryable<PersonDto> model = DbContext.Persons;
+
+            if (loadOptions is null) return model;
+
+            if (loadOptions.Any(opt => opt == PersonLoadOptions.WithBiography || opt == PersonLoadOptions.Full))
             {
-                PersonLoadOptions.WithBiography => DbContext.Persons
-                    .Include(t => t.Biography),
-                PersonLoadOptions.WithPictures => DbContext.Persons
-                    .Include(t => t.Photos),
-                PersonLoadOptions.WithGenealogicalTree => DbContext.Persons
-                    .Include(t => t.GenealogicalTree),
-                PersonLoadOptions.Full => DbContext.Persons
-                    .Include(p => p.Biography).ThenInclude(b => b.BirthPlace)
-                    .Include(p => p.Biography).ThenInclude(b => b.DeathPlace)
-                    .Include(p => p.GenealogicalTree)
-                    .Include(p => p.Photos),
-                _ => DbContext.Persons,
-            };
+                model = model.Include(p => p.Biography).ThenInclude(b => b.BirthDate);
+                model = model.Include(p => p.Biography).ThenInclude(b => b.BirthPlace);
+            }
+
+            if (loadOptions.Any(opt => opt == PersonLoadOptions.WithPictures || opt == PersonLoadOptions.Full))
+            {
+                model = model.Include(p => p.Photos);
+            }
+
+            if (loadOptions.Any(opt => opt == PersonLoadOptions.WithGenealogicalTree || opt == PersonLoadOptions.Full))
+            {
+                model = model.Include(p => p.GenealogicalTree);
+            }
+
+            return model;
+
+        }
 
         public PersonDto GetByAccount(int accountId)
         {
