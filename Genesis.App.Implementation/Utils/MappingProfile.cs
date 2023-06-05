@@ -20,9 +20,9 @@ namespace Genesis.App.Implementation.Utils
         {
             CreateMap<AccountDto, AuthenticateResponse>()
                 .ForMember(resp => resp.FirstName, opt => 
-                    opt.MapFrom(origin => origin.RootPerson.FirstName))
+                    opt.MapFrom(origin => origin.GetRootPerson().FirstName))
                 .ForMember(resp => resp.LastName, opt =>
-                    opt.MapFrom(origin => origin.RootPerson.LastName))
+                    opt.MapFrom(origin => origin.GetRootPerson().FirstName))
                 .ForMember(resp => resp.Email, opt =>
                     opt.MapFrom(origin => origin.Login))
                 .ForMember(resp => resp.Roles, opt =>

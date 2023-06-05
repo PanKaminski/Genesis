@@ -123,7 +123,7 @@ namespace Genesis.App.Implementation.Forms
             {
                 case ControlEntityType.Modifiers:
                     var connections = accountService.GetConnections(currentUserId).ToList();
-                    items.AddRange(connections.Select(c => new SelectItem(c.RootPerson.FullName, c.Id.ToString())));
+                    items.AddRange(connections.Select(c => new SelectItem(c.GetRootPerson().FullName, c.Id.ToString())));
                     break;
                 default: break;
             }

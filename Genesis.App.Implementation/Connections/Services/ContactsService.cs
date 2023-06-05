@@ -75,11 +75,11 @@ namespace Genesis.App.Implementation.Connections.Services
                 var userCard = new UserCardResponse
                 {
                     UserId = account.Id,
-                    UserName = account.RootPerson.GetTreeNodeName(),
+                    UserName = account.GetRootPerson().GetTreeNodeName(),
                     ConnectionsCount = account.IncomingConnections.Count + account.OutgoingConnections.Count,
-                    Avatar = account.RootPerson.Photos.FirstOrDefault(p => p.IsMain)?.Url ?? null,
-                    Country = account.RootPerson.Biography.BirthPlace?.Country,
-                    City = account.RootPerson.Biography.BirthPlace?.Settlement,
+                    Avatar = account.GetRootPerson().Photos.FirstOrDefault(p => p.IsMain)?.Url ?? null,
+                    Country = account.GetRootPerson().Biography.BirthPlace?.Country,
+                    City = account.GetRootPerson().Biography.BirthPlace?.Settlement,
                     Buttons = GetCardButtons(null, null, accountId),
                 };
 
@@ -178,12 +178,12 @@ namespace Genesis.App.Implementation.Connections.Services
                     ConnectionId = connection.Id,
                     Status = connection.Status,
                     UserId = account.Id,
-                    UserName = account.RootPerson.GetTreeNodeName(),
+                    UserName = account.GetRootPerson().GetTreeNodeName(),
                     ConnectionsCount = account.IncomingConnections.Where(c => c.Status == ConnectionStatus.Accepted).Count()
                         + account.OutgoingConnections.Where(c => c.Status == ConnectionStatus.Accepted).Count(),
-                    Avatar = account.RootPerson.Photos.FirstOrDefault(p => p.IsMain)?.Url ?? null,
-                    Country = account.RootPerson.Biography.BirthPlace?.Country,
-                    City = account.RootPerson.Biography.BirthPlace?.Settlement,
+                    Avatar = account.GetRootPerson().Photos.FirstOrDefault(p => p.IsMain)?.Url ?? null,
+                    Country = account.GetRootPerson().Biography.BirthPlace?.Country,
+                    City = account.GetRootPerson().Biography.BirthPlace?.Settlement,
                     Buttons = GetCardButtons(connection.Status, connection.AccountToId, accountId),
                 };
 

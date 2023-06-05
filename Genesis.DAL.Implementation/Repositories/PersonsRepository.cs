@@ -75,9 +75,9 @@ namespace Genesis.DAL.Implementation.Repositories
 
         }
 
-        public PersonDto GetByAccount(int accountId)
+        public PersonDto GetByAccount(int accountId, List<PersonLoadOptions> loadOptions = null)
         {
-            return DbContext.Persons.FirstOrDefault(p => p.AccountId == accountId);
+            return PrepareModel(loadOptions).FirstOrDefault(p => p.AccountId == accountId && p.HasLinkToAccount);
         }
 
         public void RemovePerson(int personId)

@@ -9,7 +9,7 @@ namespace Genesis.DAL.Contract.Repositories
 
         IEnumerable<PersonDto> GetTreePersons(int treeId);
 
-        PersonDto GetByAccount(int accountId);
+        PersonDto GetByAccount(int accountId, List<PersonLoadOptions> loadOptions = null);
 
         PersonDto GetPerson(int id, List<PersonLoadOptions> loadOptions = null, bool trackPerson = false);
 

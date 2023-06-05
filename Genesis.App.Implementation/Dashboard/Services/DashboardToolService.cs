@@ -50,12 +50,17 @@ namespace Genesis.App.Implementation.Dashboard.Services
             return builder.BuildForm(person);
         }
 
-        public async Task<ServerResponse<TreeNodeResponse>> SavePersonFormAsync(PersonEditModel editModel)
+        public async Task<ServerResponse<TreeNodeResponse>> SavePersonFormAsync(PersonEditModel editModel, string currentAccountId)
         {
             try
             {
+                if (!int.TryParse(currentAccountId, out int accountId) || accountId < 1)
+                {
+                    throw new ArgumentException("Invalid user", nameof(currentAccountId));
+                }
+
                 var person = editModel.PersonEditorInfo.Id is not null ? personService.GetPersonWithFullInfo(editModel.PersonEditorInfo.Id.Value)
-                    : new Person { Gender = editModel.PersonEditorInfo.Gender, };
+                    : new Person { Gender = editModel.PersonEditorInfo.Gender, AccountId = accountId };
                 var linkedPersonId = editModel.PersonEditorInfo.PersonRelationFrom is null ? editModel.PersonEditorInfo.PersonRelationTo 
                     : editModel.PersonEditorInfo.PersonRelationFrom;
                 var linkedPerson = linkedPersonId is not null ? personService.GetPersonWithGenealogicalTree(linkedPersonId.Value)

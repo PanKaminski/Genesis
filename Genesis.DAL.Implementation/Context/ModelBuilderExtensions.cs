@@ -21,11 +21,10 @@ namespace Genesis.DAL.Implementation.Context
                 .UsingEntity(e => e.ToTable("persons_roles"));
 
             modelBuilder.Entity<AccountDto>()
-                .HasOne(a => a.RootPerson)
+                .HasMany(a => a.OwnedPersons)
                 .WithOne(p => p.Account)
-                .HasForeignKey<PersonDto>()
-                .OnDelete(DeleteBehavior.Cascade)
-                .IsRequired(false);
+                .HasForeignKey(p => p.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<AccountDto>()
                 .HasMany(a => a.AvailableTrees)

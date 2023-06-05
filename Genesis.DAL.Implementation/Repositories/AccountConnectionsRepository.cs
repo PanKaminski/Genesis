@@ -43,20 +43,20 @@ namespace Genesis.DAL.Implementation.Repositories
                 throw new ArgumentException("Invalid page number", nameof(page));
 
             IQueryable<AccountConnectionDto> connectionsModel = DbContext.AccountConnections.Include(c => c.AccountFrom)
-                .ThenInclude(a => a.RootPerson).ThenInclude(p => p.Photos);
+                .ThenInclude(a => a.OwnedPersons.Where(p => p.HasLinkToAccount)).ThenInclude(p => p.Photos);
 
             connectionsModel = connectionsModel.Include(c => c.AccountFrom)
-                .ThenInclude(a => a.RootPerson).ThenInclude(p => p.Biography).ThenInclude(b => b.BirthPlace);
+                .ThenInclude(a => a.OwnedPersons.Where(p => p.HasLinkToAccount)).ThenInclude(p => p.Biography).ThenInclude(b => b.BirthPlace);
 
             connectionsModel = connectionsModel.Include(c => c.AccountFrom).ThenInclude(a => a.IncomingConnections);
 
             connectionsModel = connectionsModel.Include(c => c.AccountFrom).ThenInclude(a => a.OutgoingConnections);
 
             connectionsModel = connectionsModel.Include(c => c.AccountTo)
-                .ThenInclude(a => a.RootPerson).ThenInclude(p => p.Photos);
+                .ThenInclude(a => a.OwnedPersons.Where(p => p.HasLinkToAccount)).ThenInclude(p => p.Photos);
 
             connectionsModel = connectionsModel.Include(c => c.AccountTo)
-                .ThenInclude(a => a.RootPerson).ThenInclude(p => p.Biography).ThenInclude(b => b.BirthPlace);
+                .ThenInclude(a => a.OwnedPersons.Where(p => p.HasLinkToAccount)).ThenInclude(p => p.Biography).ThenInclude(b => b.BirthPlace);
 
             connectionsModel = connectionsModel.Include(c => c.AccountTo).ThenInclude(a => a.IncomingConnections);
 

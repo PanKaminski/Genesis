@@ -6,5 +6,6 @@ public enum AccountLoadOptions
     WithFullPersonData,
     WithAvailableTrees,
     WithPersonalTrees,
-    WithConnections
+    WithConnections,
+    WithOwnedPersons,
 }
