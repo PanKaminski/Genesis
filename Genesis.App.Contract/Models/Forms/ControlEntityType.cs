@@ -16,6 +16,7 @@
         Note,
         Pictures,
         Modifiers,
-        Name
+        Name,
+        RootPerson
     }
 }

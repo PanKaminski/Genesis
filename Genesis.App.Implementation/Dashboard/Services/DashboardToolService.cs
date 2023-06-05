@@ -124,7 +124,7 @@ namespace Genesis.App.Implementation.Dashboard.Services
 
             var tree = treeId == default ? new GenealogicalTree() : treeService.GetTreeWithModifiers(treeId);
 
-            var builder = new GenealogicalTreeFormBuilder(accountService, accountId);
+            var builder = new GenealogicalTreeFormBuilder(accountService, treeService, accountId);
 
             return builder.BuildForm(tree);
         }

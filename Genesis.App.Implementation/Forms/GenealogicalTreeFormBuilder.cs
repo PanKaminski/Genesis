@@ -13,8 +13,7 @@ namespace Genesis.App.Implementation.Forms
         private readonly IGenealogicalTreeService treeService;
         private readonly int currentUserId;
 
-        public GenealogicalTreeFormBuilder(IAccountService accountService,
-            IGenealogicalTreeService treeService, int currentUserId)
+        public GenealogicalTreeFormBuilder(IAccountService accountService, IGenealogicalTreeService treeService, int currentUserId)
         {
             this.accountService = accountService;
             this.currentUserId = currentUserId;
@@ -24,6 +23,7 @@ namespace Genesis.App.Implementation.Forms
         protected override List<FormTab> FormTabs => new List<FormTab>
         {
             new FormTab(1, "Common"),
+            new FormTab(2, "Notes"),
         };
 
         public async Task SaveFormAsync(GenealogicalTree tree, IEnumerable<ControlValue> formValues, SavePictureRequest picture)
@@ -52,7 +52,7 @@ namespace Genesis.App.Implementation.Forms
 
         protected override IEnumerable<Control> CreateFormControls(GenealogicalTree tree)
         {
-            return new List<Control>
+            var controls = new List<Control>
             {
                 new Control
                 {
@@ -80,7 +80,29 @@ namespace Genesis.App.Implementation.Forms
                     IsReadonly = tree is not null && tree.OwnerId != currentUserId,
                     TabId = 1,
                 },
+                new Control
+                {
+                    EntityType = ControlEntityType.Note,
+                    Type = ControlType.TextArea,
+                    Name = "Description",
+                    IsReadonly = tree is not null && tree.OwnerId != currentUserId,
+                    TabId = 2,
+                },
             };
+
+            if (tree.Id < 1)
+            {
+                controls.Add(new Control
+                {
+                    EntityType = ControlEntityType.RootPerson,
+                    Type = ControlType.DatePicker,
+                    Name = "Root Person",
+                    IsRequired = true,
+                    TabId = 1,
+                });
+            }
+
+            return controls;
         }
 
         protected override List<ButtonType> GetButtonTypes(GenealogicalTree tree)
@@ -127,8 +149,10 @@ namespace Genesis.App.Implementation.Forms
                             PublicId = ph.PublicId
                         };
                     }
+                case ControlEntityType.Note when tree?.Description is not null:
+                    return tree.Description;
                 default:
-                    throw new KeyNotFoundException("Invalid entity type for tree form");
+                    return null;
             }
         }
 
