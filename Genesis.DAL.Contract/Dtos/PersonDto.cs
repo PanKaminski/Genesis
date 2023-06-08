@@ -10,13 +10,14 @@ public class PersonDto : ManagedEntity
     {
     }
 
-    public PersonDto(string firstName, string lastName, string middleName, int gender)
+    public PersonDto(string firstName, string lastName, string middleName, int gender, bool isRoot)
     {
         FirstName = firstName;
         LastName = lastName;
         MiddleName = middleName;
         Gender = (Gender)gender;
         Biography = new BiographyDto();
+        HasLinkToAccount = isRoot;
     }
 
     public string FirstName { get; set; }
@@ -27,8 +28,10 @@ public class PersonDto : ManagedEntity
 
     public Gender Gender { get; set; }
 
-    public int? AccountId { get; set; }
+    public int AccountId { get; set; }
     public AccountDto Account { get; set; }
+
+    public bool HasLinkToAccount { get; set; }
 
     public int? GenealogicalTreeId { get; set; }
     public GenealogicalTreeDto GenealogicalTree { get; set; }

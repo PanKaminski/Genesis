@@ -9,7 +9,7 @@ namespace Genesis.App.Implementation.Forms
         public Form BuildForm(T model)
         {
             PrepareModel(model);
-            var controls = CreateFormControls();
+            var controls = CreateFormControls(model);
             foreach (var control in controls)
             {
                 control.Value = GetControlValue(control, model);
@@ -30,7 +30,7 @@ namespace Genesis.App.Implementation.Forms
 
         }
 
-        protected abstract IEnumerable<Control> CreateFormControls();
+        protected abstract IEnumerable<Control> CreateFormControls(T model);
 
         protected abstract object GetControlValue(Control control, T model);
 

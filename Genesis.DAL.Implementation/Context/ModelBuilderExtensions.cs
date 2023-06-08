@@ -21,11 +21,10 @@ namespace Genesis.DAL.Implementation.Context
                 .UsingEntity(e => e.ToTable("persons_roles"));
 
             modelBuilder.Entity<AccountDto>()
-                .HasOne(a => a.RootPerson)
+                .HasMany(a => a.OwnedPersons)
                 .WithOne(p => p.Account)
-                .HasForeignKey<PersonDto>()
-                .OnDelete(DeleteBehavior.Cascade)
-                .IsRequired(false);
+                .HasForeignKey(p => p.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<AccountDto>()
                 .HasMany(a => a.AvailableTrees)
@@ -85,10 +84,11 @@ namespace Genesis.DAL.Implementation.Context
                 .WithOne(n => n.Place)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            modelBuilder.Entity<GenealogicalTreeDto>()
-                .HasOne(gt => gt.Owner)
-                .WithMany(a => a.PersonalTrees)
-                .HasForeignKey(gt => gt.OwnerId);
+            modelBuilder.Entity<AccountDto>()
+                .HasMany(a => a.PersonalTrees)
+                .WithOne(t => t.Owner)
+                .HasForeignKey(t => t.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<GenealogicalTreeDto>()
                 .HasOne(gt => gt.CoatOfArms)

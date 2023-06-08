@@ -102,7 +102,7 @@ export class FamilyTreeComponent implements OnInit, OnDestroy {
     if (this.familyTree.getNode(node.id)) {
       this.familyTree.updateNode(node);
     } else {
-      this.familyTree.addNode(node);
+      this.familyTree.addNode(node, null, true);
     }
   }
 

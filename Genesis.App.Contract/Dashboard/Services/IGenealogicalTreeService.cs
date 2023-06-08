@@ -10,5 +10,9 @@ namespace Genesis.App.Contract.Dashboard.Services
         IEnumerable<GenealogicalTree> GetUsersTreesWithModifiersAndPersons(int userId);
 
         GenealogicalTree GetTreeWithModifiers(int treeId);
+
+        Task<int> AddTreeAsync(GenealogicalTree tree, bool SaveChanges);
+
+        Task UpdateTreeAsync(GenealogicalTree tree, bool SaveChanges);
     }
 }

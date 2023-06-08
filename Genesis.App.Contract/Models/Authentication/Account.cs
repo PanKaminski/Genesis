@@ -5,6 +5,16 @@ namespace Genesis.App.Contract.Models.Authentication;
 
 public class Account : AuditableEntity
 {
+    public Account()
+    {
+
+    }
+
+    public Account(int id)
+    {
+        Id = id;
+    }
+
     public string Login { get; set; }
 
     public IList<Role> Roles { get; set; }
@@ -39,10 +49,12 @@ public class Account : AuditableEntity
 
     public IList<AccountConnection> IncomingConnections { get; set; }
 
-    public Person RootPerson { get; set; }
+    public IList<Person> OwnedPersons { get; set; }
 
     public bool HasToken(string token) 
     {
         return this.RefreshTokens?.Find(rt => rt.Token == token) is not null;
     }
+
+    public Person GetRootPerson() => OwnedPersons?.FirstOrDefault(p => p.HasLinkToAccount);
 }

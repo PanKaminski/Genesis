@@ -130,6 +130,15 @@ namespace Genesis.DAL.Implementation.Repositories
 
         public bool Exists(string email) => DbContext.Accounts.TryGetSingleValue(a => a.Login == email, out _);
 
+        public IEnumerable<AccountDto> Get(IEnumerable<int> ids, bool trackEntities, IList<AccountLoadOptions> loadOptions = null)
+        {
+            var model = PrepareModel(loadOptions);
+
+            if (!trackEntities) model = model.AsNoTracking();
+
+            return model.Where(acc => ids.Contains(acc.Id));
+        }
+
         private IQueryable<AccountDto> PrepareModel(IList<AccountLoadOptions> loadOptions)
         {
             IQueryable<AccountDto> model = DbContext.Accounts.Include(acc => acc.RefreshTokens).Include(acc => acc.Roles);
@@ -138,23 +147,32 @@ namespace Genesis.DAL.Implementation.Repositories
 
             if (loadOptions.Any(lo => lo == AccountLoadOptions.WithPersonData))
             {
-                model = model.Include(acc => acc.RootPerson);
+                model = model.Include(acc => acc.OwnedPersons.Where(p => p.HasLinkToAccount));
             }
             else if (loadOptions.Any(lo => lo == AccountLoadOptions.WithFullPersonData))
             {
-                model = model.Include(acc => acc.RootPerson).ThenInclude(p => p.Biography);
-                model = model.Include(acc => acc.RootPerson).ThenInclude(p => p.Photos);
+                model = model.Include(acc => acc.OwnedPersons.Where(p => p.HasLinkToAccount)).ThenInclude(p => p.Biography)
+                    .ThenInclude(b => b.BirthPlace);
+                model = model.Include(acc => acc.OwnedPersons.Where(p => p.HasLinkToAccount)).ThenInclude(p => p.Biography)
+                    .ThenInclude(b => b.DeathPlace);
+                model = model.Include(acc => acc.OwnedPersons.Where(p => p.HasLinkToAccount)).ThenInclude(p => p.Photos);
+            }
+
+            if (loadOptions.Any(lo => lo == AccountLoadOptions.WithOwnedPersons))
+            {
+                model = model.Include(acc => acc.OwnedPersons).ThenInclude(p => p.Biography);
+                model = model.Include(acc => acc.OwnedPersons).ThenInclude(p => p.Photos);
             }
 
             if (loadOptions.Any(lo => lo == AccountLoadOptions.WithAvailableTrees))
             {
-                model = model.Include(acc => acc.RootPerson).Include(a => a.AvailableTrees)
+                model = model.Include(acc => acc.OwnedPersons.Where(p => p.HasLinkToAccount)).Include(a => a.AvailableTrees)
                     .ThenInclude(t => t.Persons);
             }
 
             if (loadOptions.Any(lo => lo == AccountLoadOptions.WithPersonalTrees))
             {
-                model = model.Include(acc => acc.RootPerson).Include(a => a.PersonalTrees)
+                model = model.Include(acc => acc.OwnedPersons.Where(p => p.HasLinkToAccount)).Include(a => a.PersonalTrees)
                     .ThenInclude(t => t.Persons);
             }
 

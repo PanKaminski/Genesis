@@ -126,7 +126,8 @@ public class AccountService : IAccountService
             viewModel.FirstName,
             viewModel.LastName,
             viewModel.MiddleName,
-            viewModel.Gender
+            viewModel.Gender,
+            true
         );
         unitOfWork.PersonsRepository.Add(rootPerson);
 
@@ -136,7 +137,7 @@ public class AccountService : IAccountService
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(viewModel.Password),
             VerificationToken = GenerateVerificationToken(),
             Verified = null,
-            RootPerson = rootPerson,
+            OwnedPersons = new List<PersonDto> { rootPerson },
         };
 
         await emailService.SendEmailAsync(CreateEmailVerificationMessage(accountDto, origin));
@@ -256,10 +257,17 @@ public class AccountService : IAccountService
 
     public IEnumerable<Account> GetConnections(int accountId)
     {
-        var accountsModel = this.unitOfWork.AccountsRepository.GetConnections(
+        var accountsModel = unitOfWork.AccountsRepository.GetConnections(
             accountId, ConnectionStatus.Accepted, true, true,
             false, new List<AccountLoadOptions> { AccountLoadOptions.WithFullPersonData, AccountLoadOptions.WithConnections }
             );
+
+        return mapper.Map<IEnumerable<Account>>(accountsModel);
+    }
+
+    public IEnumerable<Account> GetAccounts(IEnumerable<int> accountIds)
+    {
+        var accountsModel = unitOfWork.AccountsRepository.Get(accountIds, true);
 
         return mapper.Map<IEnumerable<Account>>(accountsModel);
     }
@@ -281,7 +289,7 @@ public class AccountService : IAccountService
                             <p><code>{account.VerificationToken}</code></p>";
         }
 
-        var targetName = $"{account.RootPerson.GetFullName()}";
+        var targetName = $"{account.GetRootPerson()?.GetFullName() ?? string.Empty}";
 
         return new EmailMessage("Genesis - Verify Email", message, account.Login, targetName);
     }
@@ -301,7 +309,7 @@ public class AccountService : IAccountService
                             <p><code>{account.ResetToken}</code></p>";
         }
 
-        var targetName = account.RootPerson.GetFullName();
+        var targetName = account.GetRootPerson()?.GetFullName() ?? string.Empty;
 
         return new EmailMessage("Genesis - Reset Password", message, account.Login, targetName);
     }

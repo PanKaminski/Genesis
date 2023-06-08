@@ -38,5 +38,7 @@ public class AccountDto : AuditableEntity
 
     public IList<AccountConnectionDto> IncomingConnections { get; set; }
 
-    public PersonDto RootPerson { get; set; }
+    public IList<PersonDto> OwnedPersons { get; set; }
+
+    public PersonDto GetRootPerson() => OwnedPersons?.FirstOrDefault(p => p.HasLinkToAccount);
 }

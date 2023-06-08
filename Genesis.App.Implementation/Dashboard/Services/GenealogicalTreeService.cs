@@ -3,6 +3,7 @@ using Genesis.App.Contract.Dashboard.ApiModels;
 using Genesis.App.Contract.Dashboard.Services;
 using Genesis.App.Contract.Models;
 using Genesis.Common.Exceptions;
+using Genesis.DAL.Contract.Dtos;
 using Genesis.DAL.Contract.LoadOptions;
 using Genesis.DAL.Contract.LoadOptions.Account;
 using Genesis.DAL.Contract.UOW;
@@ -18,6 +19,57 @@ namespace Genesis.App.Implementation.Dashboard.Services
         {
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
+        }
+
+        public async Task<int> AddTreeAsync(GenealogicalTree tree, bool saveChanges)
+        {
+            var coatOfArms = tree.CoatOfArms is null ? null : new PictureDto
+            {
+                Url = tree.CoatOfArms.Url,
+                PublicId = tree.CoatOfArms.PublicId,
+                IsMain = tree.CoatOfArms.IsMain,
+                CreatedTime = DateTime.Now,
+            };
+
+            var treeDto = new GenealogicalTreeDto
+            {
+                Name = tree.Name,
+                OwnerId = tree.OwnerId,
+                Description = tree.Description,
+                CoatOfArms = coatOfArms,
+                Modifiers = unitOfWork.AccountsRepository.Get(tree.Modifiers.Select(m => m.Id), true).ToList(),
+            };
+
+            await unitOfWork.GenealogicalTreesRepository.AddAsync(treeDto);
+
+            if (saveChanges) await unitOfWork.CommitAsync();
+
+            return treeDto.Id;
+        }
+
+        public async Task UpdateTreeAsync(GenealogicalTree tree, bool saveChanges)
+        {
+            unitOfWork.PicturesRepository.DeleteByTreeId(tree.Id);
+
+            var coatOfArms = tree.CoatOfArms is null ? null : new PictureDto
+            {
+                Url = tree.CoatOfArms.Url,
+                PublicId = tree.CoatOfArms.PublicId,
+                IsMain = tree.CoatOfArms.IsMain,
+                CreatedTime = DateTime.Now,
+            };
+
+            var treeDto = new GenealogicalTreeDto
+            {
+                Name = tree.Name,
+                Description = tree.Description,
+                CoatOfArms = coatOfArms,
+                Modifiers = unitOfWork.AccountsRepository.Get(tree.Modifiers.Select(m => m.Id), true).ToList(),
+            };
+
+            unitOfWork.GenealogicalTreesRepository.Update(treeDto);
+
+            if (saveChanges) await unitOfWork.CommitAsync();
         }
 
         public TreesListResponse GetAllUserTreesTrees(string userId)

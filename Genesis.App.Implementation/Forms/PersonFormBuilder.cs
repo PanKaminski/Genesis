@@ -61,7 +61,7 @@ namespace Genesis.App.Implementation.Forms
             await relationsService.AddRelationsAsync(relations, treeId, true);
         }
 
-        protected override IEnumerable<Control> CreateFormControls()
+        protected override IEnumerable<Control> CreateFormControls(Person person)
         {
             var linkedPerson = personRelation.ToPerson ?? personRelation.FromPerson;
             return new List<Control>()
@@ -285,7 +285,7 @@ namespace Genesis.App.Implementation.Forms
                     {
                         items = RootPersonRelations.Where(r => r.RelationType == Relation.Partners)
                             .Select(r => r.FromPersonId == linkedPerson.Id ? new SelectItem(r.ToPerson.FullName, r.ToPersonId.ToString())
-                            : new SelectItem(r.FromPerson.FullName, r.FromPerson.ToString())).ToList();
+                            : new SelectItem(r.FromPerson.FullName, r.FromPersonId.ToString())).ToList();
                     }
                     break;
                 case ControlEntityType.Children:

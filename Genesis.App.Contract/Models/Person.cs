@@ -19,7 +19,10 @@ public class Person : ManagedEntity
 
     public Gender Gender { get; set; }
 
+    public int AccountId { get; set; }
     public Account Account { get; set; }
+
+    public bool HasLinkToAccount { get; set; }
 
     public GenealogicalTree GenealogicalTree { get; set; }
 

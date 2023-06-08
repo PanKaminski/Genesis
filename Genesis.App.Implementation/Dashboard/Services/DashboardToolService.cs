@@ -50,12 +50,17 @@ namespace Genesis.App.Implementation.Dashboard.Services
             return builder.BuildForm(person);
         }
 
-        public async Task<ServerResponse<TreeNodeResponse>> SavePersonFormAsync(PersonEditModel editModel)
+        public async Task<ServerResponse<TreeNodeResponse>> SavePersonFormAsync(PersonEditModel editModel, string currentAccountId)
         {
             try
             {
+                if (!int.TryParse(currentAccountId, out int accountId) || accountId < 1)
+                {
+                    throw new ArgumentException("Invalid user", nameof(currentAccountId));
+                }
+
                 var person = editModel.PersonEditorInfo.Id is not null ? personService.GetPersonWithFullInfo(editModel.PersonEditorInfo.Id.Value)
-                    : new Person { Gender = editModel.PersonEditorInfo.Gender, };
+                    : new Person { Gender = editModel.PersonEditorInfo.Gender, AccountId = accountId };
                 var linkedPersonId = editModel.PersonEditorInfo.PersonRelationFrom is null ? editModel.PersonEditorInfo.PersonRelationTo 
                     : editModel.PersonEditorInfo.PersonRelationFrom;
                 var linkedPerson = linkedPersonId is not null ? personService.GetPersonWithGenealogicalTree(linkedPersonId.Value)
@@ -112,7 +117,7 @@ namespace Genesis.App.Implementation.Dashboard.Services
 
             var tree = treeService.GetTreeWithModifiers(treeId);
 
-            return tree is not null && tree.Modifiers.Any(m => m.Id == accountId);
+            return tree is not null && (tree.OwnerId == accountId || tree.Modifiers.Any(m => m.Id == accountId));
         }
 
         public Form GetTreeForm(int treeId, string currentUserId)
@@ -124,7 +129,7 @@ namespace Genesis.App.Implementation.Dashboard.Services
 
             var tree = treeId == default ? new GenealogicalTree() : treeService.GetTreeWithModifiers(treeId);
 
-            var builder = new GenealogicalTreeFormBuilder(accountService, accountId);
+            var builder = new GenealogicalTreeFormBuilder(accountService, treeService, accountId);
 
             return builder.BuildForm(tree);
         }
