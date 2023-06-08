@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Genesis.DAL.Implementation.Migrations
 {
-    public partial class Main : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -197,7 +197,8 @@ namespace Genesis.DAL.Implementation.Migrations
                     MiddleName = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: true),
                     Gender = table.Column<byte>(type: "tinyint", nullable: false),
-                    AccountId = table.Column<int>(type: "int", nullable: true),
+                    AccountId = table.Column<int>(type: "int", nullable: false),
+                    HasLinkToAccount = table.Column<bool>(type: "bit", nullable: false),
                     GenealogicalTreeId = table.Column<int>(type: "int", nullable: true),
                     CreatedTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -211,7 +212,7 @@ namespace Genesis.DAL.Implementation.Migrations
                         column: x => x.AccountId,
                         principalTable: "accounts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_persons_genealogical_trees_GenealogicalTreeId",
                         column: x => x.GenealogicalTreeId,
@@ -487,9 +488,7 @@ namespace Genesis.DAL.Implementation.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_persons_AccountId",
                 table: "persons",
-                column: "AccountId",
-                unique: true,
-                filter: "[AccountId] IS NOT NULL");
+                column: "AccountId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_persons_GenealogicalTreeId",

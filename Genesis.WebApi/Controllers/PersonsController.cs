@@ -10,7 +10,7 @@ namespace Genesis.WebApi.Controllers
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class PersonsController : ControllerBase
+    public class PersonsController : BaseApiController
     {
         private readonly DashboardToolService dashboardToolService;
 
@@ -28,12 +28,12 @@ namespace Genesis.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ServerResponse<TreeNodeResponse>>> SaveFormAsync(PersonEditModel personEditModel)
+        public async Task<ActionResult<ServerResponse<TreeNodeResponse>>> SaveFormAsync(PersonEditModel personEditModel, string currentAccountId)
         {
             if (personEditModel is null) 
                 return BadRequest();
 
-            return await dashboardToolService.SavePersonFormAsync(personEditModel);
+            return await dashboardToolService.SavePersonFormAsync(personEditModel, CurrentUserId);
         }
 
         [HttpDelete]

@@ -4,6 +4,7 @@ using Genesis.App.Contract.Dashboard.Services;
 using Genesis.App.Contract.Models;
 using Genesis.App.Implementation.Dashboard.Helpers;
 using Genesis.Common.Enums;
+using Genesis.Common.Exceptions;
 using Genesis.DAL.Contract.Dtos;
 using Genesis.DAL.Contract.LoadOptions;
 using Genesis.DAL.Contract.UOW;
@@ -19,6 +20,13 @@ namespace Genesis.App.Implementation.Dashboard.Services
         {
             this.unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        }
+
+        public IEnumerable<Person> GetPersonsWithoutTree(int ownerId)
+        {
+            if (ownerId < 1) throw new GenesisApplicationException("Invalid user id");
+
+            return mapper.Map<IEnumerable<Person>>(unitOfWork.PersonsRepository.GetPersonsWithoutTree(ownerId, false));
         }
 
         public async IAsyncEnumerable<TreeNodeResponse> GetTreePersonsAsync(int treeId, string currentUserId)

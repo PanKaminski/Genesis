@@ -7,6 +7,8 @@ namespace Genesis.App.Contract.Dashboard.Services
     {
         IAsyncEnumerable<TreeNodeResponse> GetTreePersonsAsync(int treeId, string currentUserId);
 
+        IEnumerable<Person> GetPersonsWithoutTree(int ownerId);
+
         Person GetPerson(int id);
 
         Person GetRootPerson(int accountId);

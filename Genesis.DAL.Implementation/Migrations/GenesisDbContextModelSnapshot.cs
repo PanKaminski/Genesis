@@ -413,7 +413,7 @@ namespace Genesis.DAL.Implementation.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("AccountId")
+                    b.Property<int>("AccountId")
                         .HasColumnType("int");
 
                     b.Property<int?>("ChangedByAccount")
@@ -432,6 +432,9 @@ namespace Genesis.DAL.Implementation.Migrations
                     b.Property<int?>("GenealogicalTreeId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("HasLinkToAccount")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
@@ -445,9 +448,7 @@ namespace Genesis.DAL.Implementation.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId")
-                        .IsUnique()
-                        .HasFilter("[AccountId] IS NOT NULL");
+                    b.HasIndex("AccountId");
 
                     b.HasIndex("GenealogicalTreeId");
 
@@ -680,9 +681,10 @@ namespace Genesis.DAL.Implementation.Migrations
             modelBuilder.Entity("Genesis.DAL.Contract.Dtos.PersonDto", b =>
                 {
                     b.HasOne("Genesis.DAL.Contract.Dtos.Account.AccountDto", "Account")
-                        .WithOne("RootPerson")
-                        .HasForeignKey("Genesis.DAL.Contract.Dtos.PersonDto", "AccountId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany("OwnedPersons")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Genesis.DAL.Contract.Dtos.GenealogicalTreeDto", "GenealogicalTree")
                         .WithMany("Persons")
@@ -749,11 +751,11 @@ namespace Genesis.DAL.Implementation.Migrations
 
                     b.Navigation("OutgoingConnections");
 
+                    b.Navigation("OwnedPersons");
+
                     b.Navigation("PersonalTrees");
 
                     b.Navigation("RefreshTokens");
-
-                    b.Navigation("RootPerson");
                 });
 
             modelBuilder.Entity("Genesis.DAL.Contract.Dtos.AddressDto", b =>

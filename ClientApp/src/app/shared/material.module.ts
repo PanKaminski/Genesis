@@ -26,6 +26,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatDatepickerModule } from '@angular/material/datepicker'; 
 import { MatNativeDateModule } from '@angular/material/core';
+import {MatTableModule} from '@angular/material/table';
+import {MatSortModule} from '@angular/material/sort';
+import {MatPaginatorModule} from '@angular/material/paginator';
 
 const formFieldAppearance: MatFormFieldDefaultOptions = {
   appearance: 'fill'
@@ -59,6 +62,9 @@ const MATERIAL_MODULES = [
   MatButtonToggleModule,
   MatDatepickerModule,
   MatNativeDateModule,
+  MatTableModule,
+  MatPaginatorModule,
+  MatSortModule,
 ];
 
 @NgModule({

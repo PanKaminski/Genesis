@@ -12,12 +12,15 @@ namespace Genesis.App.Implementation.Forms
         private readonly IAccountService accountService;
         private readonly IGenealogicalTreeService treeService;
         private readonly int currentUserId;
+        private readonly IPersonService personService;
 
-        public GenealogicalTreeFormBuilder(IAccountService accountService, IGenealogicalTreeService treeService, int currentUserId)
+        public GenealogicalTreeFormBuilder(IAccountService accountService, IGenealogicalTreeService treeService, 
+            IPersonService personService, int currentUserId)
         {
             this.accountService = accountService;
             this.currentUserId = currentUserId;
             this.treeService = treeService;
+            this.personService = personService;
         }
 
         protected override List<FormTab> FormTabs => new List<FormTab>
@@ -95,7 +98,7 @@ namespace Genesis.App.Implementation.Forms
                 controls.Add(new Control
                 {
                     EntityType = ControlEntityType.RootPerson,
-                    Type = ControlType.DatePicker,
+                    Type = ControlType.Select,
                     Name = "Root Person",
                     IsRequired = true,
                     TabId = 1,
@@ -124,6 +127,10 @@ namespace Genesis.App.Implementation.Forms
                 case ControlEntityType.Modifiers:
                     var connections = accountService.GetConnections(currentUserId).ToList();
                     items.AddRange(connections.Select(c => new SelectItem(c.GetRootPerson().FullName, c.Id.ToString())));
+                    break;
+                case ControlEntityType.RootPerson:
+                    var persons = personService.GetPersonsWithoutTree(currentUserId).ToList();
+                    items.AddRange(persons.Select(p => new SelectItem(p.FullName, p.Id.ToString())));
                     break;
                 default: break;
             }

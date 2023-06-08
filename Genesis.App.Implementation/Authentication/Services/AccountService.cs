@@ -56,11 +56,7 @@ public class AccountService : IAccountService
 
         unitOfWork.Commit();
 
-        var response = mapper.Map<AuthenticateResponse>(accountDto);
-        response.JwtToken = jwt;
-        response.RefreshToken = refreshToken.Token;
-
-        return response;
+        return CreateAccountResponse(accountDto, jwt, refreshToken.Token);
     }
 
     public AuthenticateResponse RefreshToken(string rtToken)
@@ -88,11 +84,7 @@ public class AccountService : IAccountService
 
         var jwtToken = tokenManager.GenerateJwt(accountDto.Id, accountDto.Roles.Select(r => r.RoleName));
 
-        var response = mapper.Map<AuthenticateResponse>(accountDto);
-        response.JwtToken = jwtToken;
-        response.RefreshToken = newRtToken.Token;
-
-        return response;
+        return CreateAccountResponse(accountDto, jwtToken, newRtToken.Token);
     }
 
     public void RevokeToken(string token)
@@ -362,5 +354,24 @@ public class AccountService : IAccountService
         token.Revoked = DateTime.UtcNow;
         token.ReasonRevoked = reason;
         token.ReplacedByToken = replacedByToken;
+    }
+
+    private AuthenticateResponse CreateAccountResponse(AccountDto account, string jwt, string rt)
+    {
+        var rootPerson = account.GetRootPerson();
+        var viewModel = new AuthenticateResponse
+        {
+            Id = account.Id,
+            FirstName = rootPerson.FirstName,
+            LastName = rootPerson.LastName,
+            Email = account.Login,
+            Picture = rootPerson.Photos?.FirstOrDefault(p => p.IsMain)?.Url,
+            Roles = account.Roles.Select(r => r.RoleName),
+            IsVerified = account.IsVerified,
+            JwtToken = jwt,
+            RefreshToken = rt
+        };
+
+        return viewModel;
     }
 }
