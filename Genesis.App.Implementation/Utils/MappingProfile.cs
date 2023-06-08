@@ -18,16 +18,6 @@ namespace Genesis.App.Implementation.Utils
 
         private void CreateAccountMap()
         {
-            CreateMap<AccountDto, AuthenticateResponse>()
-                .ForMember(resp => resp.FirstName, opt => 
-                    opt.MapFrom(origin => origin.GetRootPerson().FirstName))
-                .ForMember(resp => resp.LastName, opt =>
-                    opt.MapFrom(origin => origin.GetRootPerson().FirstName))
-                .ForMember(resp => resp.Email, opt =>
-                    opt.MapFrom(origin => origin.Login))
-                .ForMember(resp => resp.Roles, opt =>
-                    opt.MapFrom(origin => origin.Roles.Select(r => r.RoleName)));
-
             CreateMap<RefreshTokenDto, RefreshToken>().ReverseMap();
             CreateMap<AccountDto, Account>()
                 .ForMember(resp => resp.Roles, opt =>

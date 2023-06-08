@@ -1,6 +1,7 @@
 ﻿using Genesis.Common;
 using Genesis.Common.Enums;
 using Genesis.DAL.Contract.Dtos.Account;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Genesis.DAL.Contract.Dtos;
 

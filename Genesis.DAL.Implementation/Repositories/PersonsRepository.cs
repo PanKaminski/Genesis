@@ -49,6 +49,24 @@ namespace Genesis.DAL.Implementation.Repositories
             throw new GenesisDalException("Person is not found", nameof(id));
         }
 
+        public IEnumerable<PersonDto> GetPersonsWithoutTree(int ownerId, bool trackEntities, List<PersonLoadOptions> loadOptions = null)
+        {
+            IQueryable<PersonDto> model = PrepareModel(loadOptions);
+
+            if (!trackEntities) model = model.AsNoTracking();
+
+            return model.Where(p => p.AccountId == ownerId && p.GenealogicalTreeId == null);
+        }
+
+        public IEnumerable<PersonDto> GetPersons(int ownerId, bool trackEntities, List<PersonLoadOptions> loadOptions = null)
+        {
+            IQueryable<PersonDto> model = PrepareModel(loadOptions);
+
+            if (!trackEntities) model = model.AsNoTracking();
+
+            return model.Where(p => p.AccountId == ownerId);
+        }
+
         private IQueryable<PersonDto> PrepareModel(List<PersonLoadOptions> loadOptions)
         {
             IQueryable<PersonDto> model = DbContext.Persons;
