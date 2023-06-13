@@ -16,6 +16,10 @@ export const PAGES_ROUTES: Routes = [
           path: 'user-management',
           loadChildren: () => import('./connections/connections.module').then((m) => m.ConnectionsModule)
         },
+        {
+          path: 'data-management',
+          loadChildren: () => import('./data-manager/data-manager.module').then((m) => m.DataManagerModule)
+        },
       ]
     },
   ];

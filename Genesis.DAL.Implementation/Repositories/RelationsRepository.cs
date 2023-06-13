@@ -51,5 +51,12 @@ namespace Genesis.DAL.Implementation.Repositories
 
             DbContext.Relations.RemoveRange(relations);
         }
+
+        public void RemovePersonRelations(IEnumerable<int> personIds)
+        {
+            var relations = DbContext.Relations.Where(r => personIds.Any(id => r.FromPersonId == id || r.ToPersonId == id));
+
+            DbContext.Relations.RemoveRange(relations);
+        }
     }
 }

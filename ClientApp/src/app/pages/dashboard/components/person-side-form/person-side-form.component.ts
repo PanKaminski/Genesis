@@ -11,9 +11,9 @@ import { ControlValue } from '@shared/models/forms/control-value';
 import { ExceptionDetails } from '@shared/models/exception-details';
 import { NotificationService } from '@shared/services/notification.service';
 import { ResultCode, ServerDataResponse, ServerResponse } from '@shared/models/server-response';
-import { TreeNode } from '../../models/tree-node';
 import { Picture } from '@shared/models/pictures/picture';
 import { ControlType } from '@shared/models/forms/control-type';
+import { PersonSaveResponse } from '../../models/person-save-response';
 
 @Component({
   selector: 'app-person-side-form',
@@ -105,7 +105,7 @@ export class PersonSideFormComponent extends BaseSideFormComponent<PersonSaveFor
       .pipe(
         takeUntil(this.destroy$)
       ).subscribe({
-        next: (result: ServerDataResponse<TreeNode>) => {
+        next: (result: ServerDataResponse<PersonSaveResponse>) => {
           this.updating = false;
           if (result.code === ResultCode.Done)
             this.onClose();

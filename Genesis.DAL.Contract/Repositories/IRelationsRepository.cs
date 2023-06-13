@@ -12,5 +12,7 @@ namespace Genesis.DAL.Contract.Repositories
         IEnumerable<PersonRelationDto> GetRelationsWithPersons(int personId, Relation? relationType = null, int? genealogicalTreeId = null);
 
         void RemovePersonRelations(int personId);
+
+        void RemovePersonRelations(IEnumerable<int> personIds);
     }
 }

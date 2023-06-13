@@ -6,6 +6,7 @@
         Select,
         Image,
         TextArea,
-        DatePicker
+        DatePicker,
+        SingleAvatar
     }
 }

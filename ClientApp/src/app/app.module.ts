@@ -5,7 +5,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HeaderComponent } from './core/header/header.component';
-import { DashboardModule } from './pages/dashboard/dashboard.module';
 import { CoreModule } from '@core/core.module';
 import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from './app-routes';
@@ -31,7 +30,6 @@ import { ErrorInterceptor } from '@shared/helpers/error-interseptor';
         AppRoutingModule,
         RouterModule.forRoot(APP_ROUTES),
         BrowserAnimationsModule,
-        DashboardModule,
         JwtModule.forRoot({
             config: {
               tokenGetter: tokenGet,

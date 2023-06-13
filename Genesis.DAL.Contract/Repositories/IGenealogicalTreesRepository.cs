@@ -14,5 +14,7 @@ namespace Genesis.DAL.Contract.Repositories
         Task AddAsync(GenealogicalTreeDto tree);
 
         void Update(GenealogicalTreeDto tree);
+
+        Task<int> GetLastCreatedTreeIdAsync(int userId);
     }
 }

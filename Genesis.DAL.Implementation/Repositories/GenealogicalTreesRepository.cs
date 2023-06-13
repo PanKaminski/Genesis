@@ -56,7 +56,7 @@ namespace Genesis.DAL.Implementation.Repositories
             return model.FirstOrDefault(t => t.Id == treeId);
         }
 
-        public async  Task AddAsync(GenealogicalTreeDto tree)
+        public async Task AddAsync(GenealogicalTreeDto tree)
         {
             tree.CreatedTime = DateTime.Now;
             await DbContext.Trees.AddAsync(tree);
@@ -64,19 +64,22 @@ namespace Genesis.DAL.Implementation.Repositories
 
         public void Update(GenealogicalTreeDto tree)
         {
-            if (DbContext.Trees.Include(t => t.CoatOfArms).TryGetSingleValue(t => t.Id == tree.Id, out GenealogicalTreeDto originalDto))
+            if (!DbContext.Trees.TryGetSingleValue(t => t.Id == tree.Id, out GenealogicalTreeDto originalDto))
             {
-                tree.UpdatedTime = DateTime.Now;
-                originalDto.Modifiers = tree.Modifiers;
-
-                if (tree.CoatOfArms is not null && tree.CoatOfArms.Id != originalDto.CoatOfArms.Id)
-                    originalDto.CoatOfArms = tree.CoatOfArms;
-
-                originalDto.Description = tree.Description;
-                originalDto.Name = tree.Name;
+                throw new GenesisApplicationException("Invalid tree id");
             }
 
-            throw new GenesisApplicationException("Invalid tree id");
+            tree.UpdatedTime = DateTime.Now;
+            originalDto.Modifiers = tree.Modifiers;
+
+            if (tree.CoatOfArms is not null && tree.CoatOfArms.Id != originalDto.CoatOfArms.Id)
+                originalDto.CoatOfArms = tree.CoatOfArms;
+
+            originalDto.Description = tree.Description;
+            originalDto.Name = tree.Name;
         }
+
+        public async Task<int> GetLastCreatedTreeIdAsync(int userId) => 
+            await DbContext.Trees.AsNoTracking().Where(t => t.OwnerId == userId).MaxAsync(t => t.Id);
     }
 }

@@ -14,29 +14,25 @@ namespace Genesis.App.Implementation.Forms
         private readonly IRelationsService relationsService;
         private readonly IPhotoService photoService;
         private readonly PersonRelation personRelation;
-        protected override List<FormTab> FormTabs => new List<FormTab>
-        {
-            new FormTab(1, "Common"),
-            new FormTab(2, "Relations"),
-            new FormTab(3, "Pictures"),
-            new FormTab(4, "Notes"),
-        };
 
         private List<PersonRelation> rootPersonRelations;
         private List<PersonRelation> RootPersonRelations => rootPersonRelations ?? relationsService.GetRelations(linkedPersonId, null).ToList();
         private int linkedPersonId => personRelation.FromPerson is null ? personRelation.ToPersonId : personRelation.FromPersonId;
-        private List<PersonRelation> personRelations  = new List<PersonRelation>();
+        private List<PersonRelation> personRelations = new List<PersonRelation>();
+
+        public PersonFormBuilder(IPersonService personService, IRelationsService relationsService, IPhotoService photoService)
+            : this(new PersonRelation(), personService, relationsService,photoService) { }
 
         public PersonFormBuilder(PersonRelation relation, IPersonService personService, IRelationsService relationsService, IPhotoService photoService)
         {
-            this.personRelation = relation ?? throw new ArgumentNullException(nameof(relation));
+            this.personRelation = relation;
             this.personService = personService;
             this.relationsService = relationsService;
             this.photoService = photoService;
         }
 
         public async Task SaveFormAsync(Person person, IEnumerable<ControlValue> formValues, IEnumerable<EditPictureRequest> updatedPhotos,
-            IEnumerable<int> removedPhotos, IEnumerable<SavePictureRequest> addedPhotos) 
+            IEnumerable<int> removedPhotos, IEnumerable<SavePictureRequest> addedPhotos)
         {
             var relations = new List<PersonRelation>();
             foreach (var formValue in formValues)
@@ -45,7 +41,7 @@ namespace Genesis.App.Implementation.Forms
             }
 
             var linkedPerson = personRelation.ToPerson ?? personRelation.FromPerson;
-            var treeId = person?.GenealogicalTree?.Id ?? linkedPerson.GenealogicalTree?.Id ?? 0;
+            var treeId = person?.GenealogicalTree?.Id ?? linkedPerson?.GenealogicalTree?.Id;
 
             if (person.Id > 0)
             {
@@ -61,14 +57,31 @@ namespace Genesis.App.Implementation.Forms
             await relationsService.AddRelationsAsync(relations, treeId, true);
         }
 
+        protected override List<FormTab> BuildFormTabs(Person person)
+        {
+            var tabs = new List<FormTab>
+            {
+                new FormTab(1, "Common"),
+                new FormTab(3, "Pictures"),
+                new FormTab(4, "Notes"),
+            };
+
+            if (!IsNewPersonWithoutRelation(person))
+            {
+                tabs.Add(new FormTab(2, "Relations"));
+            }
+
+            return tabs.OrderBy(t => t.Id).ToList();
+        }
+
         protected override IEnumerable<Control> CreateFormControls(Person person)
         {
             var linkedPerson = personRelation.ToPerson ?? personRelation.FromPerson;
-            return new List<Control>()
+            var controls = new List<Control>()
             {
                 new Control
                 {
-                    EntityType = ControlEntityType.FirstName,
+                    EntityType = EntityType.FirstName,
                     Type = ControlType.TextInput,
                     Name = "First Name",
                     IsRequired = true,
@@ -76,98 +89,109 @@ namespace Genesis.App.Implementation.Forms
                 },
                 new Control
                 {
-                    EntityType = ControlEntityType.MiddleName,
+                    EntityType = EntityType.MiddleName,
                     Type = ControlType.TextInput,
                     Name = "Middle Name",
                     TabId = 1,
                 },
                 new Control
                 {
-                    EntityType = ControlEntityType.LastName,
+                    EntityType = EntityType.LastName,
                     Type = ControlType.TextInput,
                     Name = "Last Name",
                     TabId = 1,
                 },
                 new Control
                 {
-                    EntityType = ControlEntityType.Gender,
+                    EntityType = EntityType.Gender,
                     Type = ControlType.Select,
                     Name = "Gender",
-                    IsReadonly = true,
+                    IsReadonly = Enum.IsDefined(typeof(Gender), (byte)person.Gender),
                     IsRequired = true,
                     TabId = 1,
                 },
                 new Control
                 {
-                    EntityType = ControlEntityType.DateOfBirth,
+                    EntityType = EntityType.DateOfBirth,
                     Type = ControlType.DatePicker,
                     Name = "Date of Birthday",
                     TabId = 1,
                 },
                 new Control
                 {
-                    EntityType = ControlEntityType.DateOfDeath,
+                    EntityType = EntityType.DateOfDeath,
                     Type = ControlType.DatePicker,
                     Name = "Date of Death",
                     TabId = 1,
                 },
                 new Control
                 {
-                    EntityType = ControlEntityType.Mother,
-                    Type = ControlType.Select,
-                    Name = "Mother",
-                    IsReadonly = !(linkedPerson is not null && personRelation.ToPerson is not null && personRelation.RelationType == Relation.ChildToParent && linkedPerson.Gender == Gender.Man),
-                    TabId = 2,
-                },
-                new Control
-                {
-                    EntityType = ControlEntityType.Father,
-                    Type = ControlType.Select,
-                    Name = "Father",
-                    IsReadonly = !(linkedPerson is not null && personRelation.ToPerson is not null && personRelation.RelationType == Relation.ChildToParent && linkedPerson.Gender == Gender.Woman),
-                    TabId = 2,
-                },
-                new Control
-                {
-                    EntityType = ControlEntityType.Children,
-                    Type = ControlType.Select,
-                    Name = "Children",
-                    IsMulty = true,
-                    IsReadonly = !(linkedPerson is not null && personRelation.RelationType == Relation.Partners),
-                    TabId = 2,
-                },
-                new Control
-                {
-                    EntityType = ControlEntityType.Partners,
-                    Type = ControlType.Select,
-                    Name = "Partners",
-                    IsMulty = true,
-                    IsReadonly = true,
-                    TabId = 2,
-                },
-                new Control
-                {
-                    EntityType = ControlEntityType.Note,
+                    EntityType = EntityType.Note,
                     Type = ControlType.TextArea,
                     Name = "Note",
                     TabId = 4,
                 },
                 new Control
                 {
-                    EntityType = ControlEntityType.Pictures,
+                    EntityType = EntityType.Pictures,
                     Type = ControlType.Image,
                     Name = "Photos",
                     TabId = 3,
                 },
             };
+
+            if (!IsNewPersonWithoutRelation(person))
+            {
+                controls.AddRange(new[] {
+                    new Control
+                    {
+                        EntityType = EntityType.Mother,
+                        Type = ControlType.Select,
+                        Name = "Mother",
+                        IsReadonly = !IsNewPersonWithoutRelation(person)
+                        && !(HasRelation() && personRelation.ToPerson is not null && personRelation.RelationType == Relation.ChildToParent && linkedPerson.Gender == Gender.Man),
+                        TabId = 2,
+                    },
+                    new Control
+                    {
+                        EntityType = EntityType.Father,
+                        Type = ControlType.Select,
+                        Name = "Father",
+                        IsReadonly =!IsNewPersonWithoutRelation(person)
+                        && !(HasRelation() && personRelation.ToPerson is not null && personRelation.RelationType == Relation.ChildToParent && linkedPerson.Gender == Gender.Woman),
+                        TabId = 2,
+                    },
+                    new Control
+                    {
+                        EntityType = EntityType.Children,
+                        Type = ControlType.Select,
+                        Name = "Children",
+                        IsMulty = true,
+                        IsReadonly = !IsNewPersonWithoutRelation(person)
+                        && !(HasRelation() && personRelation.RelationType == Relation.Partners),
+                        TabId = 2,
+                    },
+                    new Control
+                    {
+                        EntityType = EntityType.Partners,
+                        Type = ControlType.Select,
+                        Name = "Partners",
+                        IsMulty = true,
+                        IsReadonly = !IsNewPersonWithoutRelation(person),
+                        TabId = 2,
+                    },
+                });
+            }
+
+            return controls;
         }
 
         protected override void PrepareModel(Person person)
         {
-            if (person.Id > 0)
+            if (!IsNewPerson(person))
             {
                 personRelations = relationsService
-                    .GetRelations(person.Id, person.GenealogicalTree.Id)
+                    .GetRelations(person.Id, person.GenealogicalTreeId)
                     .ToList();
             }
         }
@@ -176,21 +200,22 @@ namespace Genesis.App.Implementation.Forms
         {
             switch (control.EntityType)
             {
-                case ControlEntityType.FirstName:
+                case EntityType.FirstName:
                     return person?.FirstName ?? string.Empty;
-                case ControlEntityType.MiddleName:
+                case EntityType.MiddleName:
                     return person?.MiddleName ?? string.Empty;
-                case ControlEntityType.LastName:
+                case EntityType.LastName:
                     return person?.LastName ?? string.Empty;
-                case ControlEntityType.Gender:
-                    return person?.Gender is not null ? ((byte)person.Gender).ToString() : ((byte)person.Gender).ToString();
-                case ControlEntityType.DateOfBirth:
+                case EntityType.Gender:
+                    var isValud = Enum.IsDefined(typeof(Gender), (byte)person.Gender);
+                    return isValud ? ((byte)person.Gender).ToString() : null;
+                case EntityType.DateOfBirth:
                     return person?.Biography is not null ? person.Biography.BirthDate : null;
-                case ControlEntityType.DateOfDeath:
+                case EntityType.DateOfDeath:
                     return person?.Biography is not null ? person.Biography.DeathDate : null;
-                case ControlEntityType.Note:
+                case EntityType.Note:
                     return person?.Biography?.Info is not null ? person.Biography.Info : string.Empty;
-                case ControlEntityType.Mother:
+                case EntityType.Mother:
                     {
                         if (personRelation.RelationType == Relation.ChildToParent && personRelation.ToPerson
                             is { Gender: Gender.Woman })
@@ -203,9 +228,9 @@ namespace Genesis.App.Implementation.Forms
                             return parentRel.ToPersonId.ToString();
                         return null;
                     }
-                case ControlEntityType.Father:
+                case EntityType.Father:
                     {
-                        if (personRelation.RelationType == Relation.ChildToParent && 
+                        if (personRelation.RelationType == Relation.ChildToParent &&
                             personRelation.ToPerson is { Gender: Gender.Man })
                         {
                             return linkedPersonId.ToString();
@@ -216,7 +241,7 @@ namespace Genesis.App.Implementation.Forms
                             return parentRel.ToPersonId.ToString();
                         return null;
                     }
-                case ControlEntityType.Partners:
+                case EntityType.Partners:
                     {
                         if (personRelation.RelationType == Relation.Partners && linkedPersonId > 0)
                         {
@@ -226,7 +251,7 @@ namespace Genesis.App.Implementation.Forms
                         return personRelations.Where(r => r.FromPersonId == person?.Id && r.RelationType == Relation.Partners)
                             .Select(pr => pr.ToPersonId == person?.Id ? pr.FromPersonId.ToString() : pr.ToPersonId.ToString());
                     }
-                case ControlEntityType.Children:
+                case EntityType.Children:
                     {
                         var children = personRelations.Where(r => r.ToPersonId == person?.Id &&
                             r.RelationType == Relation.ChildToParent).Select(r => r.FromPersonId.ToString()).ToList();
@@ -238,7 +263,7 @@ namespace Genesis.App.Implementation.Forms
 
                         return children.Any() ? children : null;
                     }
-                case ControlEntityType.Pictures when person?.Photos is not null:
+                case EntityType.Pictures when person?.Photos is not null:
                     {
                         return person.Photos.Select(ph => new PictureResponse
                         {
@@ -251,23 +276,23 @@ namespace Genesis.App.Implementation.Forms
             }
         }
 
-        protected override List<SelectItem> GetComboItems(ControlEntityType itemCode, Person person)
+        protected override List<SelectItem> GetComboItems(EntityType itemCode, Person person)
         {
             var items = new List<SelectItem>();
             var linkedPerson = personRelation.ToPerson ?? personRelation.FromPerson;
 
             switch (itemCode)
             {
-                case ControlEntityType.Gender:
-                    items = new List<SelectItem>() 
-                    { 
+                case EntityType.Gender:
+                    items = new List<SelectItem>()
+                    {
                         new SelectItem(Gender.Man.ToString(), ((byte)Gender.Man).ToString()),
                         new SelectItem(Gender.Woman.ToString(), ((byte)Gender.Woman).ToString())
                     };
                     break;
-                case ControlEntityType.Father:
-                case ControlEntityType.Mother:
-                    var gender = itemCode == ControlEntityType.Father ? Gender.Man : Gender.Woman;
+                case EntityType.Father:
+                case EntityType.Mother:
+                    var gender = itemCode == EntityType.Father ? Gender.Man : Gender.Woman;
                     if (person.Id > 0)
                     {
                         items = personRelations.Where(r => r.RelationType == Relation.ChildToParent && r.FromPersonId == person.Id
@@ -288,7 +313,7 @@ namespace Genesis.App.Implementation.Forms
                             : new SelectItem(r.FromPerson.FullName, r.FromPersonId.ToString())).ToList();
                     }
                     break;
-                case ControlEntityType.Children:
+                case EntityType.Children:
                     List<PersonRelation> childrenRels = null;
 
                     if (person.Id > 0)
@@ -305,21 +330,21 @@ namespace Genesis.App.Implementation.Forms
                     }
                     else
                     {
-                        childrenRels = new List<PersonRelation> 
-                        { 
-                            new () 
-                            { 
-                                FromPerson = linkedPerson, 
-                                ToPerson = person, 
+                        childrenRels = new List<PersonRelation>
+                        {
+                            new ()
+                            {
+                                FromPerson = linkedPerson,
+                                ToPerson = person,
                                 RelationType = Relation.ChildToParent,
                                 FromPersonId = linkedPerson.Id,
-                            } 
+                            }
                         };
                     }
 
                     items = childrenRels.Select(r => new SelectItem(r.FromPerson.FullName, r.FromPersonId.ToString())).ToList();
                     break;
-                case ControlEntityType.Partners:
+                case EntityType.Partners:
                     if (person.Id > 0)
                     {
                         items = personRelations.Where(r => r.RelationType == Relation.Partners)
@@ -343,7 +368,7 @@ namespace Genesis.App.Implementation.Forms
         {
             var buttons = new List<ButtonType> { ButtonType.Close };
 
-            if (person is not null) buttons.Add(ButtonType.Delete);
+            if (!IsNewPerson(person)) buttons.Add(ButtonType.Delete);
             buttons.Add(ButtonType.Save);
 
             return buttons;
@@ -353,25 +378,25 @@ namespace Genesis.App.Implementation.Forms
         {
             switch (value.EntityType)
             {
-                case ControlEntityType.FirstName when value.TryGet(out string firstName):
+                case EntityType.FirstName when value.TryGet(out string firstName):
                     person.FirstName = firstName;
                     break;
-                case ControlEntityType.LastName when value.TryGet(out string lastName):
+                case EntityType.LastName when value.TryGet(out string lastName):
                     person.LastName = lastName;
                     break;
-                case ControlEntityType.MiddleName when value.TryGet(out string middleName):
+                case EntityType.MiddleName when value.TryGet(out string middleName):
                     person.MiddleName = middleName;
                     break;
-                case ControlEntityType.Gender when value.TryGet(out string genderValue) && byte.TryParse(genderValue, out var gender):
-                    person.Gender =  (Gender)gender;
+                case EntityType.Gender when value.TryGet(out string genderValue) && byte.TryParse(genderValue, out var gender):
+                    person.Gender = (Gender)gender;
                     break;
-                case ControlEntityType.DateOfBirth when value.TryGet(out DateTime birthDate):
+                case EntityType.DateOfBirth when value.TryGet(out DateTime birthDate):
                     person.Biography.BirthDate = birthDate;
                     break;
-                case ControlEntityType.DateOfDeath when value.TryGet(out DateTime deathDate):
+                case EntityType.DateOfDeath when value.TryGet(out DateTime deathDate):
                     person.Biography.DeathDate = deathDate;
                     break;
-                case ControlEntityType.Father when person.Id == 0 && value.TryGet(out string fatherIdValue) && int.TryParse(fatherIdValue, out var fatherId):
+                case EntityType.Father when person.Id == 0 && value.TryGet(out string fatherIdValue) && int.TryParse(fatherIdValue, out var fatherId):
                     relations.Add(new PersonRelation
                     {
                         FromPerson = person,
@@ -379,7 +404,7 @@ namespace Genesis.App.Implementation.Forms
                         RelationType = Relation.ChildToParent,
                     });
                     break;
-                case ControlEntityType.Mother when person.Id == 0 && value.TryGet(out string motherIdValue) && int.TryParse(motherIdValue, out var motherId):
+                case EntityType.Mother when person.Id == 0 && value.TryGet(out string motherIdValue) && int.TryParse(motherIdValue, out var motherId):
                     relations.Add(new PersonRelation
                     {
                         FromPerson = person,
@@ -387,7 +412,7 @@ namespace Genesis.App.Implementation.Forms
                         RelationType = Relation.ChildToParent,
                     });
                     break;
-                case ControlEntityType.Children when person.Id == 0 && value.TryGet(out List<string> childrenIds) && childrenIds is not null:
+                case EntityType.Children when person.Id == 0 && value.TryGet(out List<string> childrenIds) && childrenIds is not null:
                     foreach (var childIdValue in childrenIds)
                     {
                         if (int.TryParse(childIdValue, out var childId))
@@ -401,7 +426,7 @@ namespace Genesis.App.Implementation.Forms
                         }
                     }
                     break;
-                case ControlEntityType.Partners when person.Id == 0 && value.TryGet(out List<string> partnerIds) && partnerIds is not null:
+                case EntityType.Partners when person.Id == 0 && value.TryGet(out List<string> partnerIds) && partnerIds is not null:
                     foreach (var partnerIdValue in partnerIds)
                     {
                         if (int.TryParse(partnerIdValue, out var partnerId))
@@ -415,9 +440,9 @@ namespace Genesis.App.Implementation.Forms
                         }
                     }
                     break;
-                case ControlEntityType.Country:
+                case EntityType.Country:
                     break;
-                case ControlEntityType.Note when value.TryGet(out string info):
+                case EntityType.Note when value.TryGet(out string info):
                     person.Biography.Info = info;
                     break;
                 default:
@@ -444,5 +469,9 @@ namespace Genesis.App.Implementation.Forms
                 await photoService.SavePersonPictures(person.Id, picturesList, false);
             }
         }
+
+        public bool IsNewPerson(Person person) => person.Id <= 0;
+        public bool HasRelation() => linkedPersonId > 0;
+        public bool IsNewPersonWithoutRelation(Person person) => IsNewPerson(person) && !HasRelation();
     }
 }

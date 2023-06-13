@@ -99,5 +99,11 @@ namespace Genesis.DAL.Implementation.Repositories
                 DbContext.Pictures.Remove(picture);
             }
         }
+
+        public void DeleteByPersonsIds(IEnumerable<int> personIds)
+        {
+            DbContext.Pictures.RemoveRange(DbContext.Pictures
+                .Where(pic => personIds.Any(id => id == pic.PersonId)));
+        }
     }
 }

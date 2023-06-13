@@ -29,6 +29,19 @@ namespace Genesis.App.Implementation.Dashboard.Services
             return mapper.Map<IEnumerable<Person>>(unitOfWork.PersonsRepository.GetPersonsWithoutTree(ownerId, false));
         }
 
+        public IEnumerable<Person> GetPersonsCreatedByUser(int ownerId)
+        {
+            if (ownerId < 1) throw new GenesisApplicationException("Invalid user id");
+
+            var loadOptions = new List<PersonLoadOptions> 
+            { 
+                PersonLoadOptions.WithBiography, 
+                PersonLoadOptions.WithPictures 
+            };
+
+            return mapper.Map<IEnumerable<Person>>(unitOfWork.PersonsRepository.GetPersons(ownerId, false, loadOptions));
+        }
+
         public async IAsyncEnumerable<TreeNodeResponse> GetTreePersonsAsync(int treeId, string currentUserId)
         {
             if (treeId <= 0) throw new ArgumentException($"Tree id = {treeId}", nameof(treeId));
@@ -86,7 +99,7 @@ namespace Genesis.App.Implementation.Dashboard.Services
             return mapper.Map<Person>(personDto);
         }
 
-        public async Task<int> AddPersonAsync(Person person, int treeId, bool saveChanges = false)
+        public async Task<int> AddPersonAsync(Person person, int? treeId, bool saveChanges = false)
         {
             var dto = mapper.Map<PersonDto>(person);
             dto.GenealogicalTreeId = treeId;
@@ -124,6 +137,21 @@ namespace Genesis.App.Implementation.Dashboard.Services
             try
             {
                 unitOfWork.PersonsRepository.RemovePerson(personId);
+
+                if (saveChanges) unitOfWork.Commit();
+            }
+            catch (Exception)
+            {
+                unitOfWork.RevertChanges();
+                throw;
+            }
+        }
+
+        public void RemovePersons(IEnumerable<int> personIds, bool saveChanges)
+        {
+            try
+            {
+                unitOfWork.PersonsRepository.RemovePersons(personIds);
 
                 if (saveChanges) unitOfWork.Commit();
             }

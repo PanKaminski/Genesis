@@ -2,7 +2,11 @@
 <div class="workspace">
     <div *ngIf="trees"
          fxLayout="row wrap" 
-         fxLayoutGap="16px">
+         fxLayoutGap="36px"
+         fxLayoutAlign="start center">
+        <button mat-fab (click)="onAddTree()">
+            <mat-icon>add</mat-icon>
+        </button>    
         <app-tree-card *ngFor="let treeCard of trees" [treeCard]="treeCard"></app-tree-card>
     </div>
 </div>

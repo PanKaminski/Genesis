@@ -6,6 +6,9 @@
         </span>
     </ng-container>
     <mat-card-content class="tree-info">
+        <button class="button-merge" mat-mini-fab color="accent">
+            <mat-icon>merge</mat-icon>
+        </button>
         <mat-card-title class="tree-card_title" 
                         [routerLink]="['/dashboard/tree', treeCard.id]">
           {{ treeCard.name }}

@@ -1,0 +1,15 @@
+<ng-container *ngIf="isLoaded; else loading">
+    <div class="workspace">
+        <app-data-table [table]="table"
+                        (addClicked)="onAddPerson()"
+                        (editRowClicked)="onEditPerson($event)"
+                        (deleteRowsClicked)="onDeletePersons($event)">
+        </app-data-table>
+    </div>    
+</ng-container>
+
+<ng-template #loading>
+    <div class="loading-space">
+      <app-loading-panel [hasAbsolutePosition]="true"></app-loading-panel>
+    </div>
+</ng-template> 

@@ -1,0 +1,30 @@
+@import "../../styles/common.scss";
+
+.data-table {
+    margin-top: 2em;
+    width: 100%;
+}
+
+mat-header-cell, mat-cell {
+    display: flex;
+    justify-content: center;
+}  
+
+.actions-panel {
+    display: flex;
+    align-items: center;
+    background-color: $project-white;
+    padding: .5em;
+    border-radius: 10px;
+}
+
+.table-action {
+    margin-left: 1em;
+}
+
+.cell-picture {
+    border-radius: 50%;
+    height: 35px;
+    width: 35px;
+    object-fit: cover;
+}

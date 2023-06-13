@@ -4,8 +4,6 @@ namespace Genesis.App.Implementation.Forms
 {
     public abstract class FormBuilder<T>
     {
-        protected abstract List<FormTab> FormTabs { get; }
-
         public Form BuildForm(T model)
         {
             PrepareModel(model);
@@ -20,21 +18,20 @@ namespace Genesis.App.Implementation.Forms
             return new Form
             {
                 Controls = controls,
-                Tabs = FormTabs,
+                Tabs = BuildFormTabs(model),
                 ButtonTypes = GetButtonTypes(model),
             };
         }
 
-        protected virtual void PrepareModel(T model)
-        {
+        protected virtual void PrepareModel(T model) { }
 
-        }
+        protected abstract List<FormTab> BuildFormTabs(T model);
 
         protected abstract IEnumerable<Control> CreateFormControls(T model);
 
         protected abstract object GetControlValue(Control control, T model);
 
-        protected abstract List<SelectItem> GetComboItems(ControlEntityType itemCode, T model);
+        protected abstract List<SelectItem> GetComboItems(EntityType itemCode, T model);
 
         protected abstract List<ButtonType> GetButtonTypes(T model);
     }

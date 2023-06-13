@@ -18,6 +18,8 @@ namespace Genesis.App.Contract.Common.Services
 
         void RemovePersonPictures(int personId, bool saveChanges);
 
+        void RemovePersonsPictures(IEnumerable<int> personsIds, bool saveChanges);
+
         void RemovePictures(IEnumerable<int> picturesIds, bool saveChanges);
 
         void MakeAvatar(int personId, int pictureId, bool saveChanges);

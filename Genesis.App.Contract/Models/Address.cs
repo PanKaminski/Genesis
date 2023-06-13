@@ -15,4 +15,8 @@ public class Address
     public IList<HistoricalNotation> Notations { get; set; }
 
     public IList<Biography> Biographies { get; set; }
+
+    public string GetFullAddress() => 
+        $"{Country ?? string.Empty}, {Settlement ?? string.Empty}, {Street ?? string.Empty}"
+        .Trim(new char[] { ' ', ','});
 }
