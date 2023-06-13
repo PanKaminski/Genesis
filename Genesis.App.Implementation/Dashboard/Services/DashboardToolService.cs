@@ -5,9 +5,13 @@ using Genesis.App.Contract.Dashboard.Services;
 using Genesis.App.Contract.Models;
 using Genesis.App.Contract.Models.Forms;
 using Genesis.App.Contract.Models.Responses;
+using Genesis.App.Contract.Models.Tables;
 using Genesis.App.Implementation.Forms;
+using Genesis.App.Implementation.Tables;
 using Genesis.Common.Enums;
 using Genesis.Common.Exceptions;
+using System.Globalization;
+using System.Xml.Linq;
 
 namespace Genesis.App.Implementation.Dashboard.Services
 {
@@ -29,8 +33,34 @@ namespace Genesis.App.Implementation.Dashboard.Services
             this.accountService = accountService;
         }
 
+        public TreesListResponse GetAllUserTrees(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+                throw new ArgumentException("User identifier is null or empty.");
+
+            if (!int.TryParse(userId, out var idNumber))
+                throw new GenesisApplicationException("User id is not number");
+
+            var treesList = new TreesListResponse();
+            foreach (var tree in treeService.GetAllUserTrees(idNumber))
+            {
+                treesList.Add(
+                    tree.Id,
+                    tree.Persons.Count,
+                    tree.Name,
+                    tree.UpdatedTime ?? tree.CreatedTime,
+                    tree.OwnerId == idNumber
+                );
+            }
+
+            return treesList;
+        }
+
         public Form GetPersonForm(PersonFormParams formParams)
         {
+            if (formParams.NewRelation is null && formParams.Id is null)
+                return GetDraftPersonForm();
+
             var person = formParams.Id is not null ? personService.GetPersonWithFullInfo(formParams.Id.Value) 
                 : new Person() { Gender = formParams.Gender, };
             var linkedPersonId = formParams.PersonRelationFrom is null ? formParams.PersonRelationTo : formParams.PersonRelationFrom;
@@ -50,7 +80,7 @@ namespace Genesis.App.Implementation.Dashboard.Services
             return builder.BuildForm(person);
         }
 
-        public async Task<ServerResponse<TreeNodeResponse>> SavePersonFormAsync(PersonEditModel editModel, string currentAccountId)
+        public async Task<ServerResponse<PersonSaveResult>> SavePersonFormAsync(PersonEditModel editModel, string currentAccountId)
         {
             try
             {
@@ -78,17 +108,21 @@ namespace Genesis.App.Implementation.Dashboard.Services
                 var builder = new PersonFormBuilder(personRelation, personService, relationsService, photoService);
 
                 await builder.SaveFormAsync(person, editModel.FormValues, editModel.UpdatedPhotos, editModel.RemovedPhotos, editModel.AddedPhotos);
+                var saveResult = new PersonSaveResult
+                {
+                    Node = await CreateTreeNodeAsync(person),
+                    Row = GeneratePersonRow(person, accountId),
+                };
 
-                return new ServerResponse<TreeNodeResponse>(ResultCode.Done, 
-                    await CreateTreeNodeAsync(person), "Person succefully saved");
+                return new ServerResponse<PersonSaveResult>(ResultCode.Done, saveResult , "Person succefully saved");
             }
             catch(GenesisApplicationException ex)
             {
-                return new ServerResponse<TreeNodeResponse>(ResultCode.Failed, null, ex.Message);
+                return new ServerResponse<PersonSaveResult>(ResultCode.Failed, null, ex.Message);
             }
             catch (Exception ex)
             {
-                return new ServerResponse<TreeNodeResponse>(ResultCode.Failed, null, "Person save failed");
+                return new ServerResponse<PersonSaveResult>(ResultCode.Failed, null, "Person save failed");
             }
         }
 
@@ -99,6 +133,22 @@ namespace Genesis.App.Implementation.Dashboard.Services
                 relationsService.RemovePersonRelations(personId, false);
                 photoService.RemovePersonPictures(personId, false);
                 personService.RemovePerson(personId, true);
+
+                return new ServerResponse(ResultCode.Done, "Person was deleted");
+            }
+            catch (Exception exc)
+            {
+                return new ServerResponse(ResultCode.Failed, exc.Message);
+            }
+        }
+
+        public ServerResponse DeletePersons(IEnumerable<int> ids)
+        {
+            try
+            {
+                relationsService.RemovePersonsRelations(ids, false);
+                photoService.RemovePersonsPictures(ids, false);
+                personService.RemovePersons(ids, true);
 
                 return new ServerResponse(ResultCode.Done, "Person was deleted");
             }
@@ -132,6 +182,39 @@ namespace Genesis.App.Implementation.Dashboard.Services
             var builder = new GenealogicalTreeFormBuilder(accountService, treeService, personService, accountId);
 
             return builder.BuildForm(tree);
+        }
+
+        public async Task<ServerResponse<GenealogicalTreeItemResponse>> SaveTreeFormAsync(TreeEditorInfo data, string currentUserId)
+        {
+            if (!int.TryParse(currentUserId, out int accountId) || accountId < 1)
+            {
+                throw new ArgumentException("Invalid user", nameof(currentUserId));
+            }
+
+            var tree = data.TreeId == default ? new GenealogicalTree() : treeService.GetTreeWithModifiersAndPersons(data.TreeId);
+
+            var builder = new GenealogicalTreeFormBuilder(accountService, treeService, personService, accountId);
+            await builder.SaveFormAsync(tree, data.Values, data.Picture);
+
+            var timeUpdate = tree.UpdatedTime ?? tree.CreatedTime;
+            var newTreeCard = new GenealogicalTreeItemResponse
+            {
+                Id = tree.Id,
+                Name = tree.Name,
+                PersonsCount = data.TreeId > 0 ? tree.Persons.Count : 1,
+                IsOwned = true,
+                LastUpdate = timeUpdate.ToString("MM/dd/yyyy h:mm tt"),
+            };
+
+            return new ServerResponse<GenealogicalTreeItemResponse>(ResultCode.Done, newTreeCard);
+        }
+
+        public Form GetDraftPersonForm()
+        {
+            var person = new Person();
+            var builder = new PersonFormBuilder(personService, relationsService, photoService);
+
+            return builder.BuildForm(person);
         }
 
         private async Task<TreeNodeResponse> CreateTreeNodeAsync(Person person)
@@ -174,6 +257,14 @@ namespace Genesis.App.Implementation.Dashboard.Services
             node.ChildrenIds = children;
 
             return node;
+        }
+
+        private Row GeneratePersonRow(Person person, int currentUser)
+        {
+            var tableBuilder = new PersonsTableBuilder(treeService, currentUser);
+            var columns = tableBuilder.GetColumns();
+
+            return tableBuilder.GenerateRow(person, columns, person.Id);
         }
     }
 }

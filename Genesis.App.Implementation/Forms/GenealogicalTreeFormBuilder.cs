@@ -23,12 +23,6 @@ namespace Genesis.App.Implementation.Forms
             this.personService = personService;
         }
 
-        protected override List<FormTab> FormTabs => new List<FormTab>
-        {
-            new FormTab(1, "Common"),
-            new FormTab(2, "Notes"),
-        };
-
         public async Task SaveFormAsync(GenealogicalTree tree, IEnumerable<ControlValue> formValues, SavePictureRequest picture)
         {
             if (picture is not null)
@@ -53,42 +47,48 @@ namespace Genesis.App.Implementation.Forms
             }
         }
 
+        protected override List<FormTab> BuildFormTabs(GenealogicalTree model) => new List<FormTab>
+        {
+            new FormTab(1, "Common"),
+            new FormTab(2, "Notes"),
+        };
+
         protected override IEnumerable<Control> CreateFormControls(GenealogicalTree tree)
         {
             var controls = new List<Control>
             {
                 new Control
                 {
-                    EntityType = ControlEntityType.Name,
+                    EntityType = EntityType.Name,
                     Type = ControlType.TextInput,
                     Name = "Name",
                     IsRequired = true,
-                    IsReadonly = tree is not null && tree.OwnerId != currentUserId,
+                    IsReadonly = tree.Id > 0 && tree.OwnerId != currentUserId,
                     TabId = 1,
                 },
                 new Control
                 {
-                    EntityType = ControlEntityType.Modifiers,
+                    EntityType = EntityType.Modifiers,
                     Type = ControlType.Select,
                     Name = "Modifiers",
                     IsRequired = false,
-                    IsReadonly = tree is not null && tree.OwnerId != currentUserId,
+                    IsReadonly = tree.Id > 0 && tree.OwnerId != currentUserId,
                     TabId = 1,
                 },
                 new Control
                 {
-                    EntityType = ControlEntityType.Pictures,
-                    Type = ControlType.Image,
-                    Name = "Photos",
-                    IsReadonly = tree is not null && tree.OwnerId != currentUserId,
+                    EntityType = EntityType.Pictures,
+                    Type = ControlType.SingleAvatar,
+                    Name = "Avatar",
+                    IsReadonly = tree.Id > 0 && tree.OwnerId != currentUserId,
                     TabId = 1,
                 },
                 new Control
                 {
-                    EntityType = ControlEntityType.Note,
+                    EntityType = EntityType.Note,
                     Type = ControlType.TextArea,
                     Name = "Description",
-                    IsReadonly = tree is not null && tree.OwnerId != currentUserId,
+                    IsReadonly = tree.Id > 0 && tree.OwnerId != currentUserId,
                     TabId = 2,
                 },
             };
@@ -97,7 +97,7 @@ namespace Genesis.App.Implementation.Forms
             {
                 controls.Add(new Control
                 {
-                    EntityType = ControlEntityType.RootPerson,
+                    EntityType = EntityType.RootPerson,
                     Type = ControlType.Select,
                     Name = "Root Person",
                     IsRequired = true,
@@ -118,17 +118,17 @@ namespace Genesis.App.Implementation.Forms
             return buttons;
         }
 
-        protected override List<SelectItem> GetComboItems(ControlEntityType itemCode, GenealogicalTree model)
+        protected override List<SelectItem> GetComboItems(EntityType itemCode, GenealogicalTree model)
         {
             var items = new List<SelectItem>();
 
             switch (itemCode)
             {
-                case ControlEntityType.Modifiers:
+                case EntityType.Modifiers:
                     var connections = accountService.GetConnections(currentUserId).ToList();
                     items.AddRange(connections.Select(c => new SelectItem(c.GetRootPerson().FullName, c.Id.ToString())));
                     break;
-                case ControlEntityType.RootPerson:
+                case EntityType.RootPerson:
                     var persons = personService.GetPersonsWithoutTree(currentUserId).ToList();
                     items.AddRange(persons.Select(p => new SelectItem(p.FullName, p.Id.ToString())));
                     break;
@@ -142,11 +142,11 @@ namespace Genesis.App.Implementation.Forms
         {
             switch (control.EntityType)
             {
-                case ControlEntityType.Modifiers when tree?.Modifiers is not null:
+                case EntityType.Modifiers when tree?.Modifiers is not null:
                     return tree.Modifiers.Select(m => m.Id.ToString()).ToList();
-                case ControlEntityType.Name:
+                case EntityType.Name:
                     return tree?.Name;
-                case ControlEntityType.Pictures when tree?.CoatOfArms is not null:
+                case EntityType.Pictures when tree?.CoatOfArms is not null:
                     {
                         var ph = tree.CoatOfArms;
                         return new PictureResponse
@@ -156,7 +156,7 @@ namespace Genesis.App.Implementation.Forms
                             PublicId = ph.PublicId
                         };
                     }
-                case ControlEntityType.Note when tree?.Description is not null:
+                case EntityType.Note when tree?.Description is not null:
                     return tree.Description;
                 default:
                     return null;
@@ -167,12 +167,16 @@ namespace Genesis.App.Implementation.Forms
         {
             switch (value.EntityType)
             {
-                case ControlEntityType.Modifiers when value.TryGet(out List<string> modifiersIds) && modifiersIds is not null:
+                case EntityType.Modifiers when value.TryGet(out List<string> modifiersIds) && modifiersIds is not null:
                     tree.Modifiers = modifiersIds.Select(id => int.TryParse(id, out var idNumber) ? new Account(idNumber) : null)
                         .Where(acc => acc is not null).ToList();
                     break;
-                case ControlEntityType.Name when value.TryGet(out string treeName):
+                case EntityType.Name when value.TryGet(out string treeName):
                     tree.Name = treeName;
+                    break;
+                case EntityType.RootPerson when value.TryGet(out string personId) && personId is not null:
+                    if (int.TryParse(personId, out var idNumber)) 
+                        tree.Persons = new List<Person> { new Person() { Id = idNumber } };
                     break;
                 default:
                     break;

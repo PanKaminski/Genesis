@@ -1,5 +1,4 @@
 import { Gender } from "@shared/enums/gender";
-import { SelectItem } from "@shared/models/forms/select-item";
 import { Picture } from "@shared/models/pictures/picture";
 import { Address } from "./address";
 
@@ -11,9 +10,12 @@ export interface Person {
     dateOfBirth?: Date;
     dateOfDeath?: Date;
     gender: Gender;
-    images?: Picture[];
+    avatar?: Picture;
     note?: string;
     birthPlace?: Address;
     deathPlace?: Address;
-    partners: SelectItem;
+    partnersIds: number[];
+    childrenIda: number[];
+    motherId?: number;
+    fatherId?: number;
 }

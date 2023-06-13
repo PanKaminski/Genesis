@@ -1,6 +1,6 @@
 ﻿namespace Genesis.App.Contract.Models.Forms
 {
-    public enum ControlEntityType
+    public enum EntityType
     {
         FirstName = 1,
         LastName,
@@ -17,6 +17,9 @@
         Pictures,
         Modifiers,
         Name,
-        RootPerson
+        RootPerson,
+        Id,
+        GenealogicalTree,
+        BirthPlace
     }
 }

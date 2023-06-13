@@ -9,6 +9,8 @@ namespace Genesis.App.Contract.Dashboard.Services
 
         void RemovePersonRelations(int personId, bool saveChanges);
 
-        Task AddRelationsAsync(IEnumerable<PersonRelation> relations, int treeId, bool saveChanges = true);
+        void RemovePersonsRelations(IEnumerable<int> personIds, bool saveChanges);
+
+        Task AddRelationsAsync(IEnumerable<PersonRelation> relations, int? treeId, bool saveChanges = true);
     }
 }

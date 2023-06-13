@@ -18,13 +18,13 @@ namespace Genesis.App.Implementation.Dashboard.Services
             this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task AddRelationsAsync(IEnumerable<PersonRelation> relations, int treeId, bool saveChanges = true)
+        public async Task AddRelationsAsync(IEnumerable<PersonRelation> relations, int? treeId, bool saveChanges = true)
         {
             ArgumentNullException.ThrowIfNull(relations, nameof(relations));
 
-            if (relations.Any())
+            if (relations.Any() && treeId is not null)
                 await this.unitOfWork.RelationsRepository.AddRelationsAsync(
-                    mapper.Map<IEnumerable<PersonRelationDto>>(relations), treeId);
+                    mapper.Map<IEnumerable<PersonRelationDto>>(relations), treeId.Value);
 
             if (saveChanges) await unitOfWork.CommitAsync();
         }
@@ -38,6 +38,13 @@ namespace Genesis.App.Implementation.Dashboard.Services
         public void RemovePersonRelations(int personId, bool saveChanges)
         {
             unitOfWork.RelationsRepository.RemovePersonRelations(personId);
+
+            if (saveChanges) unitOfWork.Commit();
+        }
+
+        public void RemovePersonsRelations(IEnumerable<int> personIds, bool saveChanges)
+        {
+            unitOfWork.RelationsRepository.RemovePersonRelations(personIds);
 
             if (saveChanges) unitOfWork.Commit();
         }

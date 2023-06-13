@@ -75,7 +75,6 @@ namespace Genesis.DAL.Implementation.Repositories
 
             if (loadOptions.Any(opt => opt == PersonLoadOptions.WithBiography || opt == PersonLoadOptions.Full))
             {
-                model = model.Include(p => p.Biography).ThenInclude(b => b.BirthDate);
                 model = model.Include(p => p.Biography).ThenInclude(b => b.BirthPlace);
             }
 
@@ -108,6 +107,15 @@ namespace Genesis.DAL.Implementation.Repositories
             DbContext.Biographies.Remove(DbContext.Biographies.First(b =>  b.PersonId == personId));
 
             DbContext.Persons.Remove(person);
+        }
+
+        public void RemovePersons(IEnumerable<int> personIds)
+        {
+            var persons = DbContext.Persons.Where(p => personIds.Contains(p.Id));
+            var bios = DbContext.Biographies.Where(b => personIds.Contains(b.PersonId.Value));
+            DbContext.Biographies.RemoveRange(bios);
+
+            DbContext.Persons.RemoveRange(persons);
         }
     }
 }

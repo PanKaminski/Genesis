@@ -13,6 +13,8 @@ namespace Genesis.DAL.Contract.Repositories
 
         void DeleteByPersonId(int personId);
 
+        void DeleteByPersonsIds(IEnumerable<int> personIds);
+
         void DeleteByTreeId(int treeId);
 
         void Delete(IEnumerable<int> pictureIds);

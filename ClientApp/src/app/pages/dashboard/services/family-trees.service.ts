@@ -2,24 +2,29 @@ import { Injectable, OnDestroy } from "@angular/core";
 import FamilyTree from "@balkangraph/familytree.js";
 import { Gender } from "@shared/enums/gender";
 import { Form } from "@shared/models/forms/form";
-import { SideOverlayService } from "@shared/services/side-overlay.service";
-import { concatMap, Observable, Subject } from "rxjs";
+import { ResultCode, ServerDataResponse } from "@shared/models/server-response";
+import { NotificationService } from "@shared/services/notification.service";
+import { PersonSideOverlayService } from "@shared/services/person-side-overlay-.service";
+import { concatMap, map, Observable, Subject } from "rxjs";
 import { FamilyTreesApiService } from "../api/family-trees.api.service";
-import { PersonSideFormComponent } from "../components/person-side-form/person-side-form.component";
 import { PersonEditorData } from "../models/person-editor-data";
 import { PersonRelationType } from "../models/person-relation-type";
 import { TreeCardInfo } from "../models/tree-card-info";
+import { TreeFormData } from "../models/tree-form-data";
 import { TreeNode } from "../models/tree-node";
 import { TreesList } from "../models/trees-list";
 
 @Injectable({
-  providedIn: 'any'
+  providedIn: 'root'
 })
 export class FamilyTreeService implements OnDestroy {
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
+  private readonly treeCardUpdatedSub$ = new Subject<TreeCardInfo>();
+  treeCardUpdated$ = this.treeCardUpdatedSub$.asObservable();
 
   constructor(
     private readonly api: FamilyTreesApiService,
+    private readonly notifier: NotificationService,
   ) {
     this.configureBalkanTreeMenuUi();
   }
@@ -39,6 +44,18 @@ export class FamilyTreeService implements OnDestroy {
     return this.api.loadTreeForm(treeId);
   }
 
+  saveTree(data: TreeFormData): Observable<ServerDataResponse<TreeCardInfo>> {
+    return this.api.saveTree(data).pipe(
+      map((result: ServerDataResponse<TreeCardInfo>) => {
+          if (result.code === ResultCode.Failed)
+            this.notifier.notifyErrorMessage(result.message);
+          else
+            this.treeCardUpdatedSub$.next(result.data);
+          return result;
+      }),
+    );
+  }
+
   canLoadTree(treeId): Observable<boolean> {
     return this.api.canLoadTree(treeId);
   }
@@ -55,7 +72,7 @@ export class FamilyTreeService implements OnDestroy {
     };
   }
 
-  configureCircleMenu(familyTree: FamilyTree, sidePanelService: SideOverlayService): void {
+  configureCircleMenu(familyTree: FamilyTree, sidePanelService: PersonSideOverlayService): void {
     familyTree.nodeCircleMenuUI.on('show', function (sender, args) {
       delete args.menu.father;
       delete args.menu.mother;
@@ -112,7 +129,7 @@ export class FamilyTreeService implements OnDestroy {
 
   resolveMenuItemsActions(
     family: FamilyTree, 
-    sidePanelService: SideOverlayService
+    sidePanelService: PersonSideOverlayService
     ): void {
     family.nodeCircleMenuUI.on('click', function (sender, args) {
       let node = family.getNode(args.nodeId);
@@ -152,10 +169,7 @@ export class FamilyTreeService implements OnDestroy {
             return;
       };
 
-      sidePanelService.openSidePanel<PersonSideFormComponent>(
-        PersonSideFormComponent, 
-        params
-      );  
+      sidePanelService.openNewPersonForm(params);  
     });
   }
 

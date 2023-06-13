@@ -18,5 +18,7 @@ namespace Genesis.DAL.Contract.Repositories
         PersonDto GetPerson(int id, List<PersonLoadOptions> loadOptions = null, bool trackPerson = false);
 
         void RemovePerson(int personId);
+
+        void RemovePersons(IEnumerable<int> personIds);
     }
 }

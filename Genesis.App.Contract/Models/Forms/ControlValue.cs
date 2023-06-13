@@ -4,7 +4,7 @@ namespace Genesis.App.Contract.Models.Forms
 {
     public class ControlValue
     {
-        public ControlEntityType EntityType { get; set; }
+        public EntityType EntityType { get; set; }
 
         public JToken Value { get; set; }
 

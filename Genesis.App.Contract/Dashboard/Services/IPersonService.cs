@@ -7,6 +7,8 @@ namespace Genesis.App.Contract.Dashboard.Services
     {
         IAsyncEnumerable<TreeNodeResponse> GetTreePersonsAsync(int treeId, string currentUserId);
 
+        IEnumerable<Person> GetPersonsCreatedByUser(int ownerId);
+
         IEnumerable<Person> GetPersonsWithoutTree(int ownerId);
 
         Person GetPerson(int id);
@@ -17,10 +19,12 @@ namespace Genesis.App.Contract.Dashboard.Services
 
         Person GetPersonWithFullInfo(int id);
 
-        Task<int> AddPersonAsync(Person person, int treeId, bool saveChanges = false);
+        Task<int> AddPersonAsync(Person person, int? treeId, bool saveChanges = false);
 
         Task EditPersonAsync(Person person, bool saveChanges = false);
 
         void RemovePerson(int personId, bool saveChanges);
+
+        void RemovePersons(IEnumerable<int> personIds, bool saveChanges);
     }
 }

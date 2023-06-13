@@ -2,12 +2,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import FamilyTree from "@balkangraph/familytree.js";
 import { NotificationService } from '@shared/services/notification.service';
-import { SideOverlayService } from '@shared/services/side-overlay.service';
+import { PersonSideOverlayService } from '@shared/services/person-side-overlay-.service';
 import { Subject, takeUntil } from 'rxjs';
 import { TreeNode } from '../../models/tree-node';
 import { FamilyTreeService } from '../../services/family-trees.service';
 import { PersonEditorService } from '../../services/person-editor-service';
-import { PersonSideFormComponent } from '../person-side-form/person-side-form.component';
 
 @Component({
   selector: 'app-family-tree',
@@ -24,7 +23,7 @@ export class FamilyTreeComponent implements OnInit, OnDestroy {
     private readonly treeService: FamilyTreeService,
     private readonly notificationService: NotificationService,
     private readonly activatedRoute: ActivatedRoute,
-    private readonly sidePanelService: SideOverlayService,
+    private readonly sidePanelService: PersonSideOverlayService,
     private readonly personEditorService: PersonEditorService,
   ) { }
 
@@ -90,10 +89,7 @@ export class FamilyTreeComponent implements OnInit, OnDestroy {
 
   private initListeners(): void {
     this.familyTree.onNodeClick(({event, node}) => {
-      this.sidePanelService.openSidePanel<PersonSideFormComponent>(
-        PersonSideFormComponent, 
-        {id: +node.id}
-      );  
+      this.sidePanelService.openPersonForm(+node.id);
     });
   }
 

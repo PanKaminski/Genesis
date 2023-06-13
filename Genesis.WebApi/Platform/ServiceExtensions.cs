@@ -7,6 +7,7 @@ using Genesis.App.Implementation.Authentication.Services;
 using Genesis.App.Implementation.Common.Services;
 using Genesis.App.Implementation.Connections.Services;
 using Genesis.App.Implementation.Dashboard.Services;
+using Genesis.App.Implementation.DataManager;
 using Genesis.App.Implementation.Utils;
 using Genesis.DAL.Contract.Repositories;
 using Genesis.DAL.Contract.UOW;
@@ -84,8 +85,8 @@ internal static class ServiceExtensions
         services.AddScoped<IConnectionsService, ConnectionsService>();
         services.AddScoped<DashboardToolService>();
         services.AddScoped<ContactsService>();
+        services.AddScoped<DataManagerToolService>();
 
         return services;
     }
-
 }

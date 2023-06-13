@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Genesis.App.Contract.Dashboard.ApiModels;
 using Genesis.App.Contract.Dashboard.Services;
 using Genesis.App.Contract.Models;
 using Genesis.Common.Exceptions;
@@ -38,6 +37,10 @@ namespace Genesis.App.Implementation.Dashboard.Services
                 Description = tree.Description,
                 CoatOfArms = coatOfArms,
                 Modifiers = unitOfWork.AccountsRepository.Get(tree.Modifiers.Select(m => m.Id), true).ToList(),
+                Persons = new List<PersonDto> 
+                {
+                    unitOfWork.PersonsRepository.GetPerson(tree.Persons.First().Id, trackPerson: true) 
+                },
             };
 
             await unitOfWork.GenealogicalTreesRepository.AddAsync(treeDto);
@@ -61,6 +64,7 @@ namespace Genesis.App.Implementation.Dashboard.Services
 
             var treeDto = new GenealogicalTreeDto
             {
+                Id = tree.Id,
                 Name = tree.Name,
                 Description = tree.Description,
                 CoatOfArms = coatOfArms,
@@ -72,50 +76,47 @@ namespace Genesis.App.Implementation.Dashboard.Services
             if (saveChanges) await unitOfWork.CommitAsync();
         }
 
-        public TreesListResponse GetAllUserTreesTrees(string userId)
+        public IEnumerable<GenealogicalTree> GetAllUserTrees(int userId)
         {
-            if (string.IsNullOrEmpty(userId))
-                throw new ArgumentException("User identifier is null or empty.");
-
-            if (!int.TryParse(userId, out var idNumber))
-                throw new GenesisApplicationException("User id is not number");
-            
             var account = unitOfWork.AccountsRepository
-                .GetById(idNumber, new List<AccountLoadOptions> 
+                .GetById(userId, new List<AccountLoadOptions> 
                 { 
                     AccountLoadOptions.WithAvailableTrees,
                     AccountLoadOptions.WithPersonalTrees
                 });
 
-            var treesList = new TreesListResponse();
+            foreach (var ownedTree in MapTrees(account.PersonalTrees))
+                yield return ownedTree;
+            foreach (var availableTree in MapTrees(account.AvailableTrees))
+                yield return availableTree;
+        }
 
-            foreach (var tree in account.PersonalTrees)
+        private IEnumerable<GenealogicalTree> MapTrees(IEnumerable<GenealogicalTreeDto> dtos)
+        {
+            foreach (var dto in dtos)
             {
-                treesList.Add(
-                    tree.Id,
-                    tree.Persons.Count,
-                    tree.Name,
-                    tree.UpdatedTime ?? tree.CreatedTime,
-                    true
-                );
-            }
+                var coatOfArms = dto.CoatOfArms is not null ? new Picture(dto.CoatOfArms.Id, dto.CoatOfArms.PublicId, dto.CoatOfArms.Url, true) : null;
+                var persons = dto.Persons is not null ? dto.Persons.Select(p => new Person(p.FirstName, p.MiddleName, p.LastName, p.Gender, p.HasLinkToAccount)).ToList() : null;
 
-            foreach (var tree in account.AvailableTrees)
-            {
-                treesList.Add(
-                    tree.Id, 
-                    tree.Persons.Count, 
-                    tree.Name, 
-                    tree.UpdatedTime ?? tree.CreatedTime
-                );
+                yield return new GenealogicalTree(
+                    dto.Id,
+                    dto.Name, 
+                    dto.OwnerId, 
+                    dto.Description, 
+                    coatOfArms, dto.UpdatedTime, 
+                    dto.CreatedTime, 
+                    persons
+                    );
             }
-
-            return treesList;
         }
 
         public GenealogicalTree GetTreeWithModifiers(int treeId) => 
             mapper.Map<GenealogicalTree>(unitOfWork.GenealogicalTreesRepository
                 .GetTree(treeId, false, new List<TreeLoadOptions> { TreeLoadOptions.WithModifiers }));
+
+        public GenealogicalTree GetTreeWithModifiersAndPersons(int treeId) =>
+            mapper.Map<GenealogicalTree>(unitOfWork.GenealogicalTreesRepository
+                .GetTree(treeId, false, new List<TreeLoadOptions> { TreeLoadOptions.WithModifiers, TreeLoadOptions.WithPersonData }));
 
         public IEnumerable<GenealogicalTree> GetUsersTreesWithModifiersAndPersons(int userId)
         {
@@ -123,6 +124,35 @@ namespace Genesis.App.Implementation.Dashboard.Services
                 .GetAvailableTrees(userId, new List<TreeLoadOptions> { TreeLoadOptions.WithModifiers, TreeLoadOptions.WithPersonData });
 
             return mapper.Map<IEnumerable<GenealogicalTree>>(trees);
+        }
+
+        public async Task<int> GetLastCreatedTreeIdAsync(int userId) =>
+            await unitOfWork.GenealogicalTreesRepository.GetLastCreatedTreeIdAsync(userId);
+        
+        public async Task CreateDraftTreeAsync(GenealogicalTree tree)
+        {
+            if (!tree.Persons.Any()) 
+                throw new GenesisApplicationException("Can't create draft tree without persons.");
+            try
+            {
+                var owner = unitOfWork.AccountsRepository.GetById(tree.OwnerId);
+                var person = unitOfWork.PersonsRepository.GetPerson(tree.Persons.First().Id, trackPerson: true);
+
+                var treeDto = new GenealogicalTreeDto
+                {
+                    Owner = owner,
+                    Persons = new List<PersonDto> { person },
+                    Name = tree.Name,
+                };
+
+                await unitOfWork.GenealogicalTreesRepository.AddAsync(treeDto);
+                await unitOfWork.CommitAsync();
+            }
+            catch (Exception)
+            {
+                unitOfWork.RevertChanges();
+                throw;
+            }
         }
     }
 }

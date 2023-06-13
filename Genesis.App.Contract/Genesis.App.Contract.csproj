@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Genesis.Common\Genesis.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DataManager\" />
+  </ItemGroup>
+
 </Project>

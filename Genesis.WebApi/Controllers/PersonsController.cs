@@ -28,7 +28,7 @@ namespace Genesis.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ServerResponse<TreeNodeResponse>>> SaveFormAsync(PersonEditModel personEditModel, string currentAccountId)
+        public async Task<ActionResult<ServerResponse<PersonSaveResult>>> SaveFormAsync(PersonEditModel personEditModel, string currentAccountId)
         {
             if (personEditModel is null) 
                 return BadRequest();
@@ -43,5 +43,14 @@ namespace Genesis.WebApi.Controllers
 
             return dashboardToolService.DeletePerson(personId);
         }
+
+        [HttpPost]
+        public ActionResult<ServerResponse> DeletePersons(DeletePersonsModel model)
+        {
+            if (model?.PersonsIds is null) return BadRequest();
+
+            return dashboardToolService.DeletePersons(model.PersonsIds);
+        }
+
     }
 }

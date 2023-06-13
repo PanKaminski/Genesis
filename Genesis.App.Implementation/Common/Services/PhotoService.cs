@@ -123,6 +123,13 @@ namespace Genesis.App.Implementation.Common.Services
             if (saveChanges) unitOfWork.Commit();
         }
 
+        public void RemovePersonsPictures(IEnumerable<int> personsIds, bool saveChanges)
+        {
+            unitOfWork.PicturesRepository.DeleteByPersonsIds(personsIds);
+
+            if (saveChanges) unitOfWork.Commit();
+        }
+
         public void ChangeCoatOfArms(int treeId, Picture picture, bool saveChanges)
         {
             unitOfWork.PicturesRepository.DeleteByTreeId(treeId);

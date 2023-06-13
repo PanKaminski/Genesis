@@ -5,6 +5,9 @@
                 <div class="form-fields-wrapper">
                     <div class="avatar-wrapper" *ngIf="showAvatar(tab.name)">
                         <img [src]="avatar" alt="Avatar">
+                        <button mat-mini-fab color="accent">
+                            <mat-icon>add</mat-icon>
+                        </button>
                     </div>
                     <ng-container *ngFor="let control of getTabControls(tab.id)">
                         <ng-container [ngSwitch]="control.type">
